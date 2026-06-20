@@ -1,0 +1,90 @@
+import { PlayCircle, Edit3, MoreVertical, Zap } from "lucide-react";
+import Link from "next/link";
+
+interface Quiz {
+  id: number;
+  title: string;
+  description: string;
+  created_by_username: string;
+  is_public: boolean;
+  created_on: string;
+  questions: any[];
+}
+
+export default async function LibraryPage() {
+  const tabs = ["Quizzes", "Flashcards", "Slides"];
+  
+  // Fetch quizzes from Django API directly in this Server Component
+  let quizzes: Quiz[] = [];
+  try {
+    const res = await fetch("http://127.0.0.1:8000/api/v1/quizzes/", {
+      cache: "no-store", // Always fetch the latest data
+    });
+    if (res.ok) {
+      quizzes = await res.json();
+    }
+  } catch (error) {
+    console.error("Failed to fetch quizzes:", error);
+  }
+  
+  return (
+    <div className="pt-8 pb-32 animate-in relative min-h-screen">
+      <h1 className="text-2xl font-bold mb-6 font-outfit text-zinc-100">Library</h1>
+      
+      {/* Segmented Control */}
+      <div className="flex bg-zinc-900/50 p-1 rounded-2xl border border-zinc-800 mb-6 shadow-sm">
+        {tabs.map((tab, idx) => (
+          <button 
+            key={idx}
+            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all interactive ${
+              idx === 0 
+                ? "bg-zinc-800 text-indigo-400 border border-zinc-700 shadow-md" 
+                : "text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Content List */}
+      <div className="flex flex-col gap-3">
+        {quizzes.length === 0 ? (
+          <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6">
+            No quizzes found in the database.
+          </div>
+        ) : (
+          quizzes.map((quiz) => (
+            <Link href={`/library/${quiz.id}`} key={quiz.id}>
+              <div className="glass-panel p-4 rounded-2xl flex flex-col gap-3 interactive group cursor-pointer hover:border-indigo-500/30 transition-colors">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-[15px] mb-1 text-zinc-100">{quiz.title}</h3>
+                    <p className="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
+                      <PlayCircle size={12} /> {quiz.questions?.length || 0} questions • by {quiz.created_by_username || "Unknown"}
+                    </p>
+                  </div>
+                  <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                    <MoreVertical size={16} />
+                  </button>
+                </div>
+                
+                <div className="flex items-center gap-2 mt-2">
+                  <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-yellow-500 hover:border-yellow-500/50 transition-colors interactive">
+                    <Zap size={14} />
+                  </button>
+                  <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-colors interactive">
+                    <Edit3 size={14} />
+                  </button>
+                  <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold rounded-full ml-auto">
+                    {quiz.is_public ? "PUBLIC" : "PRIVATE"}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ))
+        )}
+      </div>
+    </div>
+  );
+}

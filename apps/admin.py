@@ -1,3 +1,44 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import User, Quiz, Question, Option, QuizAttempt
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('username', 'email', 'role', 'credits', 'is_staff')
+    list_filter = ('role', 'is_staff', 'is_superuser')
+    search_fields = ('username', 'email')
+
+
+@admin.register(QuizAttempt)
+class QuizAttemptAdmin(admin.ModelAdmin):
+    list_display = ('user', 'quiz', 'score', 'completed_at')
+    list_filter = ('quiz', 'completed_at')
+    search_fields = ('user__username', 'quiz__title')
+
+
+class OptionInline(admin.TabularInline):
+    model = Option
+    extra = 4
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ('text', 'quiz', 'order')
+    list_filter = ('quiz',)
+    search_fields = ('text',)
+    inlines = [OptionInline]
+
+
+class QuestionInline(admin.StackedInline):
+    model = Question
+    extra = 1
+    show_change_link = True
+
+
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('title', 'created_by', 'is_public', 'created_on')
+    list_filter = ('is_public', 'created_on')
+    search_fields = ('title', 'description')
+    inlines = [QuestionInline]
