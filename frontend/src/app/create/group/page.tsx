@@ -1,16 +1,92 @@
 "use client";
+import { apiFetch } from "@/lib/api";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChevronLeft, Search, PlusCircle, Play } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, Search, PlusCircle, Play, Loader2, Users } from "lucide-react";
 
 export default function GroupQuizPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<'create' | 'join'>('create');
   const [time, setTime] = useState(10);
   const [isPublic, setIsPublic] = useState(true);
   const [startingIn, setStartingIn] = useState('5m');
   const [teacherMode, setTeacherMode] = useState(false);
+  const [description, setDescription] = useState("");
   
+  const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [selectedQuizId, setSelectedQuizId] = useState<number | null>(null);
+  
+  const [lobbies, setLobbies] = useState<any[]>([]);
+  const [isLoadingLobbies, setIsLoadingLobbies] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    // Fetch user's quizzes for creation dropdown
+    const fetchQuizzes = async () => {
+      try {
+        const res = await apiFetch("http://127.0.0.1:8000/api/v1/quizzes/");
+        if (res.ok) {
+          const data = await res.json();
+          setQuizzes(data);
+          if (data.length > 0) setSelectedQuizId(data[0].id);
+        }
+      } catch (error) {
+        console.error("Failed to fetch quizzes:", error);
+      }
+    };
+    fetchQuizzes();
+  }, []);
+
+  useEffect(() => {
+    // Fetch active public lobbies when join tab is selected
+    if (tab === 'join') {
+      const fetchLobbies = async () => {
+        setIsLoadingLobbies(true);
+        try {
+          const res = await apiFetch("http://127.0.0.1:8000/api/v1/lobbies/");
+          if (res.ok) {
+            const data = await res.json();
+            setLobbies(data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch lobbies:", error);
+        } finally {
+          setIsLoadingLobbies(false);
+        }
+      };
+      fetchLobbies();
+    }
+  }, [tab]);
+
+  const handleCreateSession = async () => {
+    if (!selectedQuizId) return;
+    setIsCreating(true);
+    try {
+      const res = await apiFetch("http://127.0.0.1:8000/api/v1/lobbies/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quiz: selectedQuizId,
+          is_public: isPublic,
+          total_time: time,
+          teacher_mode: teacherMode,
+          // description is not in the model but startingIn could be mapped to status logic
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Redirect to a lobby wait room
+        router.push(`/play/group/${data.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to create lobby:", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <div className="pt-8 pb-32 animate-in relative min-h-screen">
       {/* Header */}
@@ -54,16 +130,38 @@ export default function GroupQuizPage() {
             />
           </div>
           
-          <div className="text-center py-12">
-            <h3 className="font-bold text-zinc-100 mb-2">No lobbies yet</h3>
-            <p className="text-xs text-zinc-500 font-medium mb-6">Create a public lobby and all users in the app will be able to see and join it here.</p>
-            <button 
-              onClick={() => setTab('create')}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.3)] interactive transition-all text-sm w-full"
-            >
-              Be the first! Create a public lobby
-            </button>
-          </div>
+          {isLoadingLobbies ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
+            </div>
+          ) : lobbies.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="font-bold text-zinc-100 mb-2">No lobbies yet</h3>
+              <p className="text-xs text-zinc-500 font-medium mb-6">Create a public lobby and all users in the app will be able to see and join it here.</p>
+              <button 
+                onClick={() => setTab('create')}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.3)] interactive transition-all text-sm w-full"
+              >
+                Be the first! Create a public lobby
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {lobbies.map((lobby) => (
+                <div key={lobby.id} className="glass-panel p-4 rounded-2xl flex justify-between items-center group interactive cursor-pointer hover:border-indigo-500/50 transition-all">
+                  <div>
+                    <h3 className="font-bold text-zinc-100 text-sm mb-1">{lobby.quiz_title}</h3>
+                    <p className="text-xs text-zinc-500 font-medium flex items-center gap-1">
+                      <Users size={12} /> {lobby.participants?.length || 0} waiting • Host: {lobby.host_username}
+                    </p>
+                  </div>
+                  <Link href={`/play/group/${lobby.id}`} className="bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors">
+                    Join
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
@@ -71,13 +169,27 @@ export default function GroupQuizPage() {
           {/* Select Quiz */}
           <div className="glass-panel p-4 rounded-2xl">
             <label className="block text-xs font-bold text-zinc-100 mb-3 uppercase tracking-wider">Select Quiz</label>
-            <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 flex items-center gap-3">
-              <div className="w-4 h-4 rounded-full border-4 border-indigo-500 bg-zinc-900 shrink-0"></div>
-              <div>
-                <div className="font-bold text-sm text-zinc-100">yangi test</div>
-                <div className="text-[10px] text-zinc-500 font-medium">30 questions</div>
+            {quizzes.length === 0 ? (
+              <div className="text-xs text-zinc-500 font-medium p-3 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                You haven't created any quizzes yet. <Link href="/create/prompt" className="text-indigo-400 hover:underline">Create one first.</Link>
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                {quizzes.map((quiz) => (
+                  <div 
+                    key={quiz.id}
+                    onClick={() => setSelectedQuizId(quiz.id)}
+                    className={`rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-colors ${selectedQuizId === quiz.id ? 'bg-indigo-500/10 border border-indigo-500/30' : 'bg-zinc-900/50 border border-zinc-800 hover:bg-zinc-800'}`}
+                  >
+                    <div className={`w-4 h-4 rounded-full border-4 shrink-0 transition-colors ${selectedQuizId === quiz.id ? 'border-indigo-500 bg-zinc-900' : 'border-zinc-700 bg-zinc-800'}`}></div>
+                    <div>
+                      <div className={`font-bold text-sm ${selectedQuizId === quiz.id ? 'text-zinc-100' : 'text-zinc-300'}`}>{quiz.title}</div>
+                      <div className="text-[10px] text-zinc-500 font-medium">{quiz.questions?.length || 0} questions</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Total Time */}
@@ -111,6 +223,8 @@ export default function GroupQuizPage() {
           <div className="glass-panel p-4 rounded-2xl">
             <input 
               type="text" 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="What's this quiz about?"
               className="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 transition-colors mb-4"
             />
@@ -139,8 +253,13 @@ export default function GroupQuizPage() {
             </div>
           </div>
 
-          <button className="w-full bg-green-500 hover:bg-green-400 text-green-950 py-4 rounded-xl font-bold text-[15px] shadow-[0_0_20px_rgba(34,197,94,0.2)] interactive flex justify-center items-center gap-2 transition-all mt-2">
-            <Play size={16} fill="currentColor" /> Create Session
+          <button 
+            onClick={handleCreateSession}
+            disabled={!selectedQuizId || isCreating}
+            className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:hover:bg-green-500 text-green-950 py-4 rounded-xl font-bold text-[15px] shadow-[0_0_20px_rgba(34,197,94,0.2)] interactive flex justify-center items-center gap-2 transition-all mt-2"
+          >
+            {isCreating ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="currentColor" />} 
+            {isCreating ? "Creating..." : "Create Session"}
           </button>
         </div>
       )}

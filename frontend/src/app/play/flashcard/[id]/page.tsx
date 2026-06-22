@@ -1,9 +1,16 @@
 "use client";
+import { apiFetch } from "@/lib/api";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { X, ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, RotateCw, Loader2 } from "lucide-react";
+
+interface Flashcard {
+  id: number;
+  front: string;
+  back: string;
+}
 
 export default function FlashcardStudyPage() {
   const params = useParams();
@@ -11,13 +18,45 @@ export default function FlashcardStudyPage() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy data
-  const flashcards = [
-    { front: "What is the formula for calculating kinetic energy?", back: "KE = 1/2 mv^2" },
-    { front: "Which of these is a scalar quantity?", back: "Speed" },
-    { front: "What is Newton's Second Law?", back: "Force = mass x acceleration (F = ma)" },
-  ];
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const res = await apiFetch(`http://127.0.0.1:8000/api/v1/quizzes/${id}/`);
+        if (res.ok) {
+          const data = await res.json();
+          setFlashcards(data.flashcards || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch flashcards:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-zinc-950 items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
+      </div>
+    );
+  }
+
+  if (flashcards.length === 0) {
+    return (
+      <div className="flex flex-col min-h-screen bg-zinc-950 items-center justify-center p-6 text-center">
+        <h2 className="text-xl font-bold text-zinc-100 mb-2">No Flashcards Found</h2>
+        <p className="text-zinc-500 mb-6">This quiz doesn't have any flashcards yet.</p>
+        <Link href={`/library/${id}`} className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2 rounded-xl font-semibold transition-colors">
+          Go Back
+        </Link>
+      </div>
+    );
+  }
 
   const currentCard = flashcards[currentIndex];
 

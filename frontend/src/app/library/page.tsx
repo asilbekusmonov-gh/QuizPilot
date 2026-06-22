@@ -1,5 +1,9 @@
-import { PlayCircle, Edit3, MoreVertical, Zap } from "lucide-react";
+"use client";
+
+import { PlayCircle, Edit3, MoreVertical, Zap, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 
 interface Quiz {
   id: number;
@@ -11,21 +15,28 @@ interface Quiz {
   questions: any[];
 }
 
-export default async function LibraryPage() {
+export default function LibraryPage() {
   const tabs = ["Quizzes", "Flashcards", "Slides"];
-  
-  // Fetch quizzes from Django API directly in this Server Component
-  let quizzes: Quiz[] = [];
-  try {
-    const res = await fetch("http://127.0.0.1:8000/api/v1/quizzes/", {
-      cache: "no-store", // Always fetch the latest data
-    });
-    if (res.ok) {
-      quizzes = await res.json();
-    }
-  } catch (error) {
-    console.error("Failed to fetch quizzes:", error);
-  }
+  const [activeTab, setActiveTab] = useState(0);
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      try {
+        const res = await apiFetch("http://127.0.0.1:8000/api/v1/quizzes/");
+        if (res.ok) {
+          const data = await res.json();
+          setQuizzes(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch quizzes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuizzes();
+  }, []);
   
   return (
     <div className="pt-8 pb-32 animate-in relative min-h-screen">
@@ -36,8 +47,9 @@ export default async function LibraryPage() {
         {tabs.map((tab, idx) => (
           <button 
             key={idx}
+            onClick={() => setActiveTab(idx)}
             className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all interactive ${
-              idx === 0 
+              activeTab === idx 
                 ? "bg-zinc-800 text-indigo-400 border border-zinc-700 shadow-md" 
                 : "text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300"
             }`}
@@ -49,19 +61,27 @@ export default async function LibraryPage() {
 
       {/* Content List */}
       <div className="flex flex-col gap-3">
-        {quizzes.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
+          </div>
+        ) : activeTab === 2 ? (
           <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6">
-            No quizzes found in the database.
+            Slides feature is coming soon! 🚀
+          </div>
+        ) : quizzes.length === 0 ? (
+          <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6">
+            No items found in the database.
           </div>
         ) : (
           quizzes.map((quiz) => (
-            <Link href={`/library/${quiz.id}`} key={quiz.id}>
+            <Link href={activeTab === 1 ? `/play/flashcard/${quiz.id}` : `/library/${quiz.id}`} key={quiz.id}>
               <div className="glass-panel p-4 rounded-2xl flex flex-col gap-3 interactive group cursor-pointer hover:border-indigo-500/30 transition-colors">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold text-[15px] mb-1 text-zinc-100">{quiz.title}</h3>
                     <p className="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
-                      <PlayCircle size={12} /> {quiz.questions?.length || 0} questions • by {quiz.created_by_username || "Unknown"}
+                      <PlayCircle size={12} /> {quiz.questions?.length || 0} items • by {quiz.created_by_username || "Unknown"}
                     </p>
                   </div>
                   <button className="text-zinc-500 hover:text-zinc-300 transition-colors">

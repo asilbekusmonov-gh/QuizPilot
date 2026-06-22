@@ -1,0 +1,41 @@
+{
+  "settings": {
+    "title": "Sozlamalar",
+    "loading": "Yuklanmoqda...",
+    "credits": "Kreditlar",
+    "premium": {
+      "title": "Premium",
+      "subtitle": "Cheksiz viktorinalar"
+    },
+    "sections": {
+      "stats": "SIZNING STATISTIKANGIZ",
+      "language": "TIL",
+      "preferences": "XOSLIKLAR",
+      "about": "ILOVA HAQIDA"
+    },
+    "stats": {
+      "quizzes_created": "Yaratilgan viktorinalar"
+    },
+    "preferences": {
+      "sound_effects": "Ovoz effektlari",
+      "sound_effects_desc": "Ovozni yoqish. Telefonlarda standart o'chirilgan."
+    },
+    "about": {
+      "help": "Yordam",
+      "version": "Versiya",
+      "terms": "Foydalanish shartlari",
+      "privacy": "Maxfiylik siyosati"
+    },
+    "buttons": {
+      "save": "Saqlash",
+      "how_it_works": "QuizPilot qanday ishlaydi",
+      "close_app": "Ilovani yopish",
+      "cancel": "Bekor qilish",
+      "ok": "OK"
+    },
+    "modal": {
+      "title": "Ilovani yopish",
+      "desc": "Ilovani yopmoqchimisiz?"
+    }
+  }
+}

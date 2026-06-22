@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import AuthProvider from "@/components/AuthProvider";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export const metadata: Metadata = {
   title: "QuizPilot",
@@ -15,10 +18,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <main className="container">
-          {children}
-        </main>
-        <BottomNav />
+        <Suspense fallback={<div>Loading...</div>}>
+          <AuthProvider>
+            <LanguageProvider>
+              <main className="container">
+                {children}
+              </main>
+              <BottomNav />
+            </LanguageProvider>
+          </AuthProvider>
+        </Suspense>
       </body>
     </html>
   );

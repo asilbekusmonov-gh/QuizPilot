@@ -1,0 +1,41 @@
+{
+  "settings": {
+    "title": "Settings",
+    "loading": "Loading...",
+    "credits": "Credits",
+    "premium": {
+      "title": "Premium",
+      "subtitle": "Unlimited quizzes"
+    },
+    "sections": {
+      "stats": "YOUR STATS",
+      "language": "LANGUAGE",
+      "preferences": "PREFERENCES",
+      "about": "ABOUT"
+    },
+    "stats": {
+      "quizzes_created": "Quizzes Created"
+    },
+    "preferences": {
+      "sound_effects": "Sound Effects",
+      "sound_effects_desc": "Play quiz sounds. Off by default on phones."
+    },
+    "about": {
+      "help": "Help",
+      "version": "Version",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
+    },
+    "buttons": {
+      "save": "Save",
+      "how_it_works": "How QuizPilot Works",
+      "close_app": "Close App",
+      "cancel": "Cancel",
+      "ok": "OK"
+    },
+    "modal": {
+      "title": "Close App",
+      "desc": "Are you sure you want to close the app?"
+    }
+  }
+}

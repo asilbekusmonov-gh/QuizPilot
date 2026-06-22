@@ -1,12 +1,13 @@
 from django.contrib import admin
 
 from .models import User, Quiz, Question, Option, QuizAttempt
+from .models.payments import SubscriptionPlan, Payment
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'role', 'credits', 'is_staff')
-    list_filter = ('role', 'is_staff', 'is_superuser')
+    list_display = ('username', 'email', 'credits', 'is_staff')
+    list_filter = ('is_staff', 'is_superuser')
     search_fields = ('username', 'email')
 
 
@@ -42,3 +43,17 @@ class QuizAdmin(admin.ModelAdmin):
     list_filter = ('is_public', 'created_on')
     search_fields = ('title', 'description')
     inlines = [QuestionInline]
+
+@admin.register(SubscriptionPlan)
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'duration_days', 'price', 'is_active', 'order')
+    list_filter = ('is_active',)
+    search_fields = ('name',)
+    ordering = ('order',)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan', 'is_active', 'expiry_date', 'created_at')
+    list_filter = ('is_active', 'plan')
+    search_fields = ('user__username', 'plan__name')
