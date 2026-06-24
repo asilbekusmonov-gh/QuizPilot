@@ -156,7 +156,7 @@ export default function SettingsPage() {
         <div key={idx} className="mb-6">
           <h4 className="text-[10px] font-bold text-zinc-500 mb-2 px-2 tracking-wider uppercase">{sec.title}</h4>
           <div className="glass-panel rounded-2xl overflow-hidden divide-y divide-zinc-800/50">
-            {sec.items.map((item, i) => (
+            {sec.items.map((item: any, i) => (
               item.type === 'custom' && item.render ? (
                 <div key={i}>{item.render()}</div>
               ) : (

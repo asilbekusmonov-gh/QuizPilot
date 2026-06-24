@@ -4,8 +4,11 @@ version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
     "automium-web>=0.1.1",
+    "celery>=5.6.3",
+    "celery-types>=0.26.0",
     "dj-database-url>=3.1.2",
     "django>=6.0.6",
+    "django-celery-results>=2.6.0",
     "django-cors-headers>=4.9.0",
     "django-filter>=25.2",
     "djangorestframework>=3.17.1",
@@ -13,8 +16,11 @@ dependencies = [
     "djangorestframework-stubs>=3.17.0",
     "dotenv>=0.9.9",
     "drf-spectacular>=0.29.0",
+    "google-generativeai>=0.8.6",
     "markdown>=3.10.2",
     "psycopg2-binary>=2.9.12",
+    "pymupdf>=1.27.2.3",
     "python-dotenv>=1.2.2",
+    "redis>=8.0.0",
     "ruff>=0.15.18",
 ]

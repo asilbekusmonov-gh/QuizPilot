@@ -1,0 +1,1 @@
+"use client"; import { useState } from "react"; export default function Test() { const [file, setFile] = useState(""); return <div className="p-10"><input type="file" onChange={(e) => setFile(e.target.files?.[0]?.name || "None")} /><h1>Selected: {file}</h1></div>; }

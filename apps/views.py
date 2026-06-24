@@ -9,10 +9,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from models import Payment
-from models.payments import SubscriptionPlan
-from serializers import PaymentModelSerializer, SubscriptionModelSerializer
-from .models import Quiz, QuizAttempt, Flashcard, Lobby, Document, GenerationRequest
+from rest_framework.response import Response
+from rest_framework import status
+import json
+
+from .models.payments import Payment, SubscriptionPlan
+from .serializers import PaymentModelSerializer, SubscriptionModelSerializer
+from .models import Quiz, Question, Option, QuizAttempt, Flashcard, Lobby, Document, GenerationRequest
+from apps.ai_service import extract_text_from_pdf, generate_quiz_from_text
 from apps.models.users import User
 from .serializers import (
     QuizAttemptSerializer, QuizSerializer, FlashcardSerializer,
@@ -75,9 +79,61 @@ class DocumentModelViewSet(ModelViewSet):
         qs = super().get_queryset()
         return qs.filter(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
+        # 1. Save the Document normally using the serializer
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        document = serializer.save(user=request.user)
+        
+        try:
+            # 2. Extract text from the newly saved PDF
+            file_path = document.file.path
+            from apps.ai_service import extract_text_from_pdf, detect_question_count_from_text
+            pdf_text = extract_text_from_pdf(file_path)
+            
+            # 3. Detect number of questions
+            detected_count = detect_question_count_from_text(pdf_text)
+            document.detected_question_count = detected_count
+            document.save()
+            
+            return Response({
+                "message": "File analyzed successfully!",
+                "detected_count": detected_count,
+                "document": serializer.data
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({
+                "error": str(e),
+                "document": serializer.data
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    from rest_framework.decorators import action
+    
+    @action(detail=True, methods=['post'])
+    def generate(self, request, pk=None):
+        document = self.get_object()
+        num_questions = int(request.data.get('num_questions', 10))
+        quiz_name = request.data.get('quiz_name', document.file_name)
+        
+        from apps.tasks import generate_quiz_background
+        
+        # Trigger celery task
+        task = generate_quiz_background.delay(document.id, num_questions, quiz_name)
+        
+        document.task_id = task.id
+        document.status = 'generating'
+        document.save()
+        
+        return Response({
+            "message": "Quiz generation started",
+            "task_id": task.id,
+            "document_id": document.id
+        })
+
 
 class GenerationRequestModelViewSet(ModelViewSet):
-    queryset = GenerationRequest.objects.all().order_by('-created_at')
+    queryset = GenerationRequest.objects.all()
     serializer_class = GenerationRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 

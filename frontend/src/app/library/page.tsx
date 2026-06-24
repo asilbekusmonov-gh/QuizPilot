@@ -4,6 +4,7 @@ import { PlayCircle, Edit3, MoreVertical, Zap, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Quiz {
   id: number;
@@ -16,7 +17,10 @@ interface Quiz {
 }
 
 export default function LibraryPage() {
-  const tabs = ["Quizzes", "Flashcards", "Slides"];
+  const { dict } = useLanguage();
+  const d = dict.library;
+
+  const tabs = [d.tabs.quizzes, d.tabs.flashcards, d.tabs.slides];
   const [activeTab, setActiveTab] = useState(0);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +44,7 @@ export default function LibraryPage() {
   
   return (
     <div className="pt-8 pb-32 animate-in relative min-h-screen">
-      <h1 className="text-2xl font-bold mb-6 font-outfit text-zinc-100">Library</h1>
+      <h1 className="text-2xl font-bold mb-6 font-outfit text-zinc-100">{d.title}</h1>
       
       {/* Segmented Control */}
       <div className="flex bg-zinc-900/50 p-1 rounded-2xl border border-zinc-800 mb-6 shadow-sm">
@@ -67,11 +71,11 @@ export default function LibraryPage() {
           </div>
         ) : activeTab === 2 ? (
           <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6">
-            Slides feature is coming soon! 🚀
+            {d.slides_coming_soon}
           </div>
         ) : quizzes.length === 0 ? (
           <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6">
-            No items found in the database.
+            {d.no_items}
           </div>
         ) : (
           quizzes.map((quiz) => (
@@ -81,7 +85,7 @@ export default function LibraryPage() {
                   <div>
                     <h3 className="font-semibold text-[15px] mb-1 text-zinc-100">{quiz.title}</h3>
                     <p className="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
-                      <PlayCircle size={12} /> {quiz.questions?.length || 0} items • by {quiz.created_by_username || "Unknown"}
+                      <PlayCircle size={12} /> {quiz.questions?.length || 0} {d.items} • {d.by} {quiz.created_by_username || d.unknown_user}
                     </p>
                   </div>
                   <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
@@ -97,7 +101,7 @@ export default function LibraryPage() {
                     <Edit3 size={14} />
                   </button>
                   <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold rounded-full ml-auto">
-                    {quiz.is_public ? "PUBLIC" : "PRIVATE"}
+                    {quiz.is_public ? d.public : d.private}
                   </span>
                 </div>
               </div>

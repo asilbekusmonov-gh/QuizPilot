@@ -1,8 +1,7 @@
 from rest_framework.serializers import CharField, CurrentUserDefault, HiddenField, ModelSerializer, IntegerField, \
     SerializerMethodField
 
-from models import Payment
-from models.payments import SubscriptionPlan
+from .models.payments import Payment, SubscriptionPlan
 from .models import Option, Question, Quiz, QuizAttempt, Flashcard, Lobby, LobbyParticipant, Document, GenerationRequest
 from apps.models.users import User
 
@@ -15,7 +14,7 @@ class UserSerializer(ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'credits', 'quiz_count']
         read_only_fields = ['id', 'credits', 'quiz_count']
 
-    def get_quiz_count(self, obj):
+    def get_quiz_count(self, obj) -> int:
         return obj.quizzes.count()
 
 
@@ -89,7 +88,7 @@ class DocumentSerializer(ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ['id', 'user', 'file', 'file_name', 'file_size', 'uploaded_at']
+        fields = ['id', 'user', 'file', 'file_name', 'file_size', 'uploaded_at', 'status', 'task_id', 'detected_question_count']
 
     def create(self, validated_data):
         file = validated_data.get('file')
@@ -112,7 +111,7 @@ class PaymentModelSerializer(ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'expiry_date']
+        fields = ['id', 'user', 'expiry_date']
 
 
 class SubscriptionModelSerializer(ModelSerializer):
@@ -120,7 +119,7 @@ class SubscriptionModelSerializer(ModelSerializer):
 
     class Meta:
         model = SubscriptionPlan
-        fields = ['name', 'duration_days', 'price', 'order', 'today_sales']
+        fields = ['id', 'name', 'duration_days', 'price', 'order', 'today_sales']
 
-    def get_today_sales(self, obj):
+    def get_today_sales(self, obj) -> int:
         return getattr(obj, 'today_sales', 0)

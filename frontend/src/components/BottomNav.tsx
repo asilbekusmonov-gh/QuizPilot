@@ -3,15 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PlusCircle, Library, Settings, Crown } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { dict } = useLanguage();
 
   const navItems = [
-    { label: "Create", href: "/", icon: PlusCircle },
-    { label: "Library", href: "/library", icon: Library },
-    { label: "Settings", href: "/settings", icon: Settings },
-    { label: "Premium", href: "/premium", icon: Crown },
+    { label: dict.nav.create, href: "/", icon: PlusCircle },
+    { label: dict.nav.library, href: "/library", icon: Library },
+    { label: dict.nav.settings, href: "/settings", icon: Settings },
+    { label: dict.nav.premium, href: "/premium", icon: Crown },
   ];
 
   return (

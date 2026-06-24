@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { HelpCircle, Star, FileText, MessageSquare, Layers, Presentation, Gamepad2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CreatePage() {
+  const { dict } = useLanguage();
+  const d = dict.home;
 
   return (
     <div className="pt-10 pb-36 animate-in relative min-h-screen bg-zinc-950">
@@ -18,20 +21,20 @@ export default function CreatePage() {
             <img src="https://ui-avatars.com/api/?name=Asilbek+Usmonov&background=27272a&color=fff" alt="User Avatar" className="w-full h-full object-cover" />
           </div>
           <div>
-            <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">Welcome back</p>
+            <p className="text-[11px] text-zinc-500 font-bold uppercase tracking-widest">{d.welcome_back}</p>
             <h1 className="text-xl font-bold text-zinc-100 font-outfit tracking-tight">Asilbek</h1>
           </div>
         </div>
         <div className="px-4 py-2 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg flex items-center gap-2 text-sm font-bold interactive cursor-pointer hover:bg-zinc-800 transition-colors">
           <Star size={14} className="text-yellow-500 fill-yellow-500" />
-          <span>1 Credit</span>
+          <span>1 {d.credit}</span>
         </div>
       </header>
 
       {/* Apple style large intro typography */}
       <div className="px-4 mb-6 relative z-10">
         <h2 className="text-3xl font-extrabold text-zinc-100 tracking-tight font-outfit leading-tight">
-          What are we <br/> learning today?
+          {d.hero_title_1} <br/> {d.hero_title_2}
         </h2>
       </div>
 
@@ -50,8 +53,8 @@ export default function CreatePage() {
             </div>
           </div>
           <div className="relative z-10 mt-6">
-            <h3 className="text-2xl font-bold text-white tracking-tight mb-1">Turn PDFs to quizzes</h3>
-            <p className="text-indigo-200 text-sm font-medium">Upload, generate, and share instantly.</p>
+            <h3 className="text-2xl font-bold text-white tracking-tight mb-1">{d.upload_pdf_title}</h3>
+            <p className="text-indigo-200 text-sm font-medium">{d.upload_pdf_desc}</p>
           </div>
         </Link>
 
@@ -66,8 +69,8 @@ export default function CreatePage() {
             </div>
           </div>
           <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">Any Topic</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">AI writes questions from just a prompt.</p>
+            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.prompt_title}</h3>
+            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.prompt_desc}</p>
           </div>
         </Link>
 
@@ -82,8 +85,8 @@ export default function CreatePage() {
             </div>
           </div>
           <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">Flashcards</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">Flip-card sets straight from docs.</p>
+            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.flashcards_title}</h3>
+            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.flashcards_desc}</p>
           </div>
         </Link>
 
@@ -99,8 +102,8 @@ export default function CreatePage() {
             </div>
           </div>
           <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">AI Slides</h3>
-            <p className="text-purple-400/80 text-[11px] font-bold tracking-wider uppercase">Premium</p>
+            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.ai_slides_title}</h3>
+            <p className="text-purple-400/80 text-[11px] font-bold tracking-wider uppercase">{d.ai_slides_premium}</p>
           </div>
         </Link>
 
@@ -116,8 +119,8 @@ export default function CreatePage() {
             </div>
           </div>
           <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">Live Games</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">Play multiplayer rounds.</p>
+            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.live_games_title}</h3>
+            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.live_games_desc}</p>
           </div>
         </Link>
 
@@ -126,7 +129,7 @@ export default function CreatePage() {
       {/* How it works Button */}
       <div className="mt-10 text-center relative z-10">
         <Link href="/how-it-works" className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg text-zinc-400 text-sm font-bold hover:text-zinc-200 hover:bg-zinc-800 transition-all active:scale-95">
-          <HelpCircle size={16} /> How QuizPilot Works
+          <HelpCircle size={16} /> {d.how_it_works}
         </Link>
       </div>
 
