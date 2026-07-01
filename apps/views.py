@@ -14,13 +14,14 @@ import random
 import string
 
 from apps.models.users import User
-from .models import Quiz, QuizAttempt, Flashcard, Lobby, Document, GenerationRequest, Public, LobbyParticipant
+from .models import Quiz, QuizAttempt, Flashcard, Lobby, Document, GenerationRequest, Public, LobbyParticipant, Question, Option, Slide
 from .models.payments import Payment, SubscriptionPlan
 from .serializers import PaymentModelSerializer, SubscriptionModelSerializer
 from .serializers import (
     QuizAttemptSerializer, QuizSerializer, FlashcardSerializer,
     LobbySerializer, DocumentSerializer, GenerationRequestSerializer,
-    UserSerializer, PublicSerializer, PublicCreateSerializer
+    UserSerializer, PublicSerializer, PublicCreateSerializer,
+    QuestionSerializer, OptionSerializer, SlideSerializer
 )
 
 
@@ -40,6 +41,27 @@ class QuizModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixin
     queryset = Quiz.objects.all().order_by('-created_on')
     serializer_class = QuizSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class QuestionModelViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(quiz__created_by=self.request.user)
+
+
+class OptionModelViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Option.objects.all()
+    serializer_class = OptionSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(question__quiz__created_by=self.request.user)
 
 
 class PublicViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -91,6 +113,14 @@ class FlashcardModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, 
     queryset = Flashcard.objects.all().order_by('order')
     serializer_class = FlashcardSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+
+class SlideModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                        mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = Slide.objects.all().order_by('order')
+    serializer_class = SlideSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
 
 
 class LobbyModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -187,12 +217,14 @@ class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, m
         quiz_name = request.data.get('quiz_name', document.file_name)
         gen_type = request.data.get('type', 'quiz')
 
-        from apps.tasks import generate_quiz_background, generate_flashcards_background
+        from apps.tasks import generate_quiz_background, generate_flashcards_background, generate_slides_background
 
         try:
             # Run generation synchronously to avoid needing celery/redis locally
             if gen_type in ['flashcard', 'flashcards']:
                 generate_flashcards_background(document.id, num_questions, quiz_name)
+            elif gen_type in ['slide', 'slides']:
+                generate_slides_background(document.id, num_questions, quiz_name)
             else:
                 generate_quiz_background(document.id, num_questions, quiz_name)
 
@@ -242,3 +274,53 @@ class SubscriptionPlanModelViewSet(viewsets.ReadOnlyModelViewSet):
         last_24_hour = timezone.now() - timedelta(hours=24)
 
         return qs.annotate(today_sales=Count('payments', filter=Q(payments__created_at__gte=last_24_hour)))
+
+
+from rest_framework.views import APIView
+from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken
+from apps.models import User
+from apps.telegram_utils import validate_telegram_data
+from rest_framework import status
+
+class TelegramAuthView(APIView):
+    permission_classes = []
+    
+    def post(self, request):
+        init_data = request.data.get('initData')
+        if not init_data:
+            return Response({"error": "initData is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        tg_user_data = validate_telegram_data(init_data, settings.TELEGRAM_BOT_TOKEN)
+        # Fallback for local testing if needed: if not tg_user_data and settings.DEBUG: 
+        if not tg_user_data:
+            return Response({"error": "Invalid Telegram data"}, status=status.HTTP_403_FORBIDDEN)
+            
+        tg_id = tg_user_data.get('id')
+        if not tg_id:
+            return Response({"error": "Telegram ID not found"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        username = f"tg_{tg_id}"
+        
+        # Get or create user
+        user, created = User.objects.get_or_create(username=username)
+        if created:
+            user.first_name = tg_user_data.get('first_name', '')
+            user.last_name = tg_user_data.get('last_name', '')
+            user.save()
+            
+        # Generate tokens
+        refresh = RefreshToken.for_user(user)
+        
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'credits': user.credits
+            }
+        })
+

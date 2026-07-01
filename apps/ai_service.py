@@ -71,3 +71,18 @@ def generate_flashcards_from_text(text, num_cards=10):
     """
     response = model.generate_content(prompt)
     return response.text
+
+
+def generate_slides_from_text(text, num_slides=10):
+    """Sends the text to Gemini and asks for a JSON array of presentation slides."""
+
+    prompt = f"""
+    Read the following text and generate exactly {num_slides} presentation slides.
+    Each slide should have a title and content (use markdown bullet points for the content to make it readable on a screen).
+    Return ONLY a JSON array with this exact structure:
+    [{{ "title": "Slide Title", "content": "- Bullet 1\\n- Bullet 2" }}]
+    
+    Text: {text[:10000]}
+    """
+    response = model.generate_content(prompt)
+    return response.text

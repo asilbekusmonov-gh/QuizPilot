@@ -137,10 +137,15 @@ export default function QuizPlayerPage() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col p-6 relative z-10">
-        <h2 className="text-2xl font-bold text-zinc-100 mb-8 leading-relaxed font-outfit mt-4">
+      <main className="flex-1 flex flex-col p-6 relative z-10 overflow-y-auto pb-24">
+        <h2 className="text-2xl font-bold text-zinc-100 mb-4 leading-relaxed font-outfit mt-4">
           {currentQuestion.question}
         </h2>
+        {currentQuestion.image && (
+          <div className="mb-8 w-full flex justify-center">
+            <img src={currentQuestion.image} alt="Question" className="max-h-56 rounded-2xl border border-zinc-800 object-contain shadow-lg" />
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           {currentQuestion.options.map((option: string, idx: number) => {

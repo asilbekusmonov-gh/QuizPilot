@@ -16,7 +16,7 @@ export default function BottomNav() {
     { label: dict.nav.premium, href: "/premium", icon: Crown },
   ];
 
-  if (pathname.startsWith("/play/")) {
+  if (pathname.startsWith("/play/") || pathname.startsWith("/edit/")) {
     return null;
   }
 

@@ -90,8 +90,10 @@ export default function UploadPage() {
 
       if (res.ok) {
         // Automatically move to the library page
-        if (genType === 'flashcard') {
+        if (genType === 'flashcard' || genType === 'flashcards') {
           router.push("/library?tab=2");
+        } else if (genType === 'slide' || genType === 'slides') {
+          router.push("/library?tab=3");
         } else {
           router.push("/library");
         }

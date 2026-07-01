@@ -9,17 +9,35 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const pathname = usePathname();
 
   useEffect(() => {
+    // 1. Process standard token in URL
     const token = searchParams.get("token");
     if (token) {
-      // Save token to localStorage
       localStorage.setItem("token", token);
-      
-      // Clean up the URL by removing the token
       const currentUrl = new URL(window.location.href);
       currentUrl.searchParams.delete("token");
-      
-      // We use replaceState instead of router.replace to avoid triggering a Next.js re-render immediately
       window.history.replaceState({}, "", currentUrl.toString());
+    }
+
+    // 2. Telegram Mini App Auth
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg && tg.initData) {
+      tg.expand(); // Expand to full height
+      
+      // Attempt login via Telegram
+      fetch("http://127.0.0.1:8000/api/v1/auth/telegram/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg.initData })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.access) {
+          localStorage.setItem("token", data.access);
+          localStorage.setItem("refresh", data.refresh);
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+      })
+      .catch(err => console.error("TMA Auth Error:", err));
     }
   }, [searchParams]);
 

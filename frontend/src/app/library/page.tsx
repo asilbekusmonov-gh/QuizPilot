@@ -3,7 +3,7 @@
 import { PlayCircle, Edit3, MoreVertical, Zap, Loader2, Bookmark, Download, Globe, CheckSquare, Search, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -39,6 +39,7 @@ export default function LibraryPage() {
   const { dict } = useLanguage();
   const searchParams = useSearchParams();
   const d = dict.library || {};
+  const router = useRouter();
 
   const tabs = [
     { label: d.tabs?.quizzes || "Quizzes", icon: "?" },
@@ -360,7 +361,13 @@ export default function LibraryPage() {
                     <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-yellow-500 hover:border-yellow-500/50 transition-colors interactive">
                       <Zap size={14} />
                     </button>
-                    <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-colors interactive">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        router.push(`/edit/quiz/${quiz.id}`);
+                      }}
+                      className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-colors interactive">
                       <Edit3 size={14} />
                     </button>
                     <span className="px-2.5 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[10px] font-bold rounded-full ml-auto">
@@ -405,7 +412,14 @@ export default function LibraryPage() {
                     <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-yellow-500 hover:border-yellow-500/50 transition-colors interactive">
                       <Zap size={14} />
                     </button>
-                    <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-orange-400 hover:border-orange-500/50 transition-colors interactive">
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Assuming edit flashcards is a different route, but for now we'll route to edit/quiz
+                        router.push(`/edit/quiz/${quiz.id}`);
+                      }}
+                      className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-orange-400 hover:border-orange-500/50 transition-colors interactive">
                       <Edit3 size={14} />
                     </button>
                     <span className="px-2.5 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 text-[10px] font-bold rounded-full ml-auto">
@@ -419,10 +433,48 @@ export default function LibraryPage() {
         </div>
       )}
 
-      {/* Slides placeholder */}
+      {/* Slides View */}
       {activeTab === 3 && (
-        <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6 animate-in fade-in">
-          {d.slides_coming_soon || "Feature coming soon! 🚀"}
+        <div className="flex flex-col gap-3">
+          {loading ? (
+            <div className="flex justify-center p-10"><Loader2 className="animate-spin text-zinc-500" /></div>
+          ) : (
+            quizzes.filter(q => q.slides && q.slides.length > 0).length === 0 ? (
+              <div className="text-zinc-500 text-center py-10 font-medium border border-zinc-800/50 rounded-2xl bg-zinc-900/20 p-6 animate-in fade-in">
+                No slides found. Generate some from the Home page!
+              </div>
+            ) : (
+              quizzes.filter(q => q.slides && q.slides.length > 0).map((quiz) => (
+                <Link key={quiz.id} href={`/play/slides/${quiz.id}`} className="block animate-in slide-in-from-bottom-2 fade-in duration-300">
+                  <div className="p-4 bg-zinc-900/40 backdrop-blur-md rounded-[20px] border border-zinc-800/60 shadow-[0_4px_20px_rgba(0,0,0,0.1)] hover:border-teal-500/50 transition-all hover:bg-zinc-800/60 group relative overflow-hidden">
+                    
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    
+                    <div className="flex items-start justify-between relative z-10">
+                      <div>
+                        <h3 className="font-semibold text-[15px] mb-1 text-zinc-100">{quiz.title}</h3>
+                        <p className="text-xs text-zinc-500 font-medium flex items-center gap-1.5">
+                          <PlayCircle size={12} /> {quiz.slides?.length || 0} slides • {d.by || "by"} {quiz.created_by_username || d.unknown_user || "Unknown"}
+                        </p>
+                      </div>
+                      <button className="text-zinc-500 hover:text-zinc-300 transition-colors">
+                        <MoreVertical size={16} />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 mt-2 relative z-10">
+                      <button className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-teal-400 hover:border-teal-500/50 transition-colors interactive">
+                        <PlayCircle size={14} />
+                      </button>
+                      <span className="px-2.5 py-1 bg-teal-500/10 text-teal-400 border border-teal-500/20 text-[10px] font-bold rounded-full ml-auto">
+                        {quiz.is_public ? (d.public || "PUBLIC") : (d.private || "PRIVATE")}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            )
+          )}
         </div>
       )}
 

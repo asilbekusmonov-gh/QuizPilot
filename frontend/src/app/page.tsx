@@ -92,18 +92,18 @@ export default function CreatePage() {
 
         {/* AI Presentation */}
         <Link 
-          href="/premium"
+          href="/create/upload?type=slide"
           className="col-span-1 bento-card bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5" />
           <div className="relative z-10 text-right flex justify-end">
             <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)] transform -rotate-3 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
-              <Presentation size={24} className="text-white drop-shadow-md" />
+              <Sparkles size={24} className="text-white drop-shadow-md" />
             </div>
           </div>
           <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.ai_slides_title}</h3>
-            <p className="text-purple-400/80 text-[11px] font-bold tracking-wider uppercase">{d.ai_slides_premium}</p>
+            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.presentation_title || "AI Slides"}</h3>
+            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.presentation_desc || "Turn documents into decks"}</p>
           </div>
         </Link>
 

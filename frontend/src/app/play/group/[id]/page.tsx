@@ -162,7 +162,12 @@ export default function GroupQuizPage() {
             <div className="inline-block bg-[#eef4ff] text-[#75a6f9] px-3 py-1 rounded-full text-xs font-bold mb-4">
               Question {currentQuestionIndex + 1}
             </div>
-            <h2 className="text-xl font-bold">{currentQ.text}</h2>
+            <h2 className="text-xl font-bold mb-4">{currentQ.text}</h2>
+            {currentQ.image && (
+              <div className="w-full flex justify-center mb-2">
+                <img src={currentQ.image} alt="Question" className="max-h-56 rounded-xl border border-zinc-200 object-contain shadow-sm" />
+              </div>
+            )}
           </div>
 
           <div className="w-full flex flex-col gap-3">

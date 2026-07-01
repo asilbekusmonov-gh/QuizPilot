@@ -2,7 +2,7 @@ from rest_framework.serializers import CharField, CurrentUserDefault, HiddenFiel
     SerializerMethodField
 
 from apps.models import User, Payment, SubscriptionPlan, Option, Question, Quiz, QuizAttempt, Flashcard, Lobby, \
-    LobbyParticipant, Document, GenerationRequest, Public
+    LobbyParticipant, Document, GenerationRequest, Public, Slide
 
 
 class UserSerializer(ModelSerializer):
@@ -28,7 +28,7 @@ class QuestionSerializer(ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ['id', 'text', 'order', 'options']
+        fields = ['id', 'text', 'image', 'order', 'options']
 
 
 class FlashcardSerializer(ModelSerializer):
@@ -37,16 +37,23 @@ class FlashcardSerializer(ModelSerializer):
         fields = ['id', 'front', 'back', 'order']
 
 
+class SlideSerializer(ModelSerializer):
+    class Meta:
+        model = Slide
+        fields = ['id', 'title', 'content', 'order']
+
+
 class QuizSerializer(ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
     flashcards = FlashcardSerializer(many=True, read_only=True)
+    slides = SlideSerializer(many=True, read_only=True)
     created_by_username = CharField(source='created_by.username', read_only=True)
     created_by = HiddenField(default=CurrentUserDefault())
 
     class Meta:
         model = Quiz
         fields = ['id', 'title', 'description', 'created_by', 'created_by_username', 'is_public', 'created_on',
-                  'questions', 'flashcards']
+                  'questions', 'flashcards', 'slides']
 
 
 class PublicSerializer(ModelSerializer):

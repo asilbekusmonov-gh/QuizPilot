@@ -122,6 +122,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -147,7 +149,10 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # Celery Configuration Options
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+
+TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
+
+CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 CELERY_TIMEZONE = "UTC"
