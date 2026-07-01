@@ -79,7 +79,7 @@ export default function LibraryPage() {
           </div>
         ) : (
           quizzes.map((quiz) => (
-            <Link href={activeTab === 1 ? `/play/flashcard/${quiz.id}` : `/library/${quiz.id}`} key={quiz.id}>
+            <Link href={activeTab === 1 ? `/play/flashcard/${quiz.id}` : `/play/quiz/${quiz.id}`} key={quiz.id}>
               <div className="glass-panel p-4 rounded-2xl flex flex-col gap-3 interactive group cursor-pointer hover:border-indigo-500/30 transition-colors">
                 <div className="flex justify-between items-start">
                   <div>

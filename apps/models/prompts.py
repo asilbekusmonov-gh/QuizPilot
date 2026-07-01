@@ -1,6 +1,5 @@
 from django.db.models import Model, ForeignKey, CASCADE
 from django.db.models.fields import TextField, IntegerField, DateTimeField
-from django.conf import settings
 
 class GenerationRequest(Model):
     user = ForeignKey("apps.User", on_delete=CASCADE, related_name='generation_requests')

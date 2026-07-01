@@ -1151,6 +1151,10 @@ dependencies = [
     { name = "pymupdf" },
     { name = "python-dotenv" },
     { name = "redis" },
+]
+
+[package.dev-dependencies]
+dev = [
     { name = "ruff" },
 ]
 
@@ -1175,8 +1179,10 @@ requires-dist = [
     { name = "pymupdf", specifier = ">=1.27.2.3" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
     { name = "redis", specifier = ">=8.0.0" },
-    { name = "ruff", specifier = ">=0.15.18" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ruff", specifier = ">=0.15.18" }]
 
 [[package]]
 name = "redis"

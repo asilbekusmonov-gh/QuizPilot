@@ -23,5 +23,4 @@ urlpatterns = [
     path('', include(router.urls)),
 ]
 
-
 # kth34ktg34ighri34h

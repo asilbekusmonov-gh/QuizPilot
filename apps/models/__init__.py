@@ -1,3 +1,4 @@
+# ruff: noqa: F401
 from .users import User
 from .quizes import Quiz, Question, Option, QuizAttempt, Flashcard
 from .payments import Payment, SubscriptionPlan

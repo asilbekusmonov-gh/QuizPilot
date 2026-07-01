@@ -85,7 +85,8 @@ export default function UploadPage() {
       });
 
       if (res.ok) {
-        pollStatus();
+        // Automatically move to the library page
+        router.push("/library");
       } else {
         const errData = await res.json();
         setErrorText("Error: " + JSON.stringify(errData));
@@ -96,27 +97,6 @@ export default function UploadPage() {
       setErrorText("Network error: Could not reach the server.");
       setStep("settings");
     }
-  };
-
-  const pollStatus = () => {
-    const interval = setInterval(async () => {
-      try {
-        const res = await apiFetch(`http://127.0.0.1:8000/api/v1/documents/${documentId}/`);
-        if (res.ok) {
-          const doc = await res.json();
-          if (doc.status === 'completed') {
-            clearInterval(interval);
-            setStep("success");
-          } else if (doc.status === 'failed') {
-            clearInterval(interval);
-            setErrorText("AI Generation failed. The document might be too complex or the AI encountered an error.");
-            setStep("settings");
-          }
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-      }
-    }, 3000);
   };
 
   return (
@@ -149,8 +129,10 @@ export default function UploadPage() {
             if (droppedFile) {
               console.log("File dropped natively!");
               // Manually create a fake event-like object to pass to handleFileChange
-              handleFileChange({ target: { files: [droppedFile] } } as any);
-            }
+              handleFileChange({target: {files: [droppedFile]}} as never).then(() => {
+                console.log("Fayl muvaffaqiyatli yuklandi!");
+              });
+             }
           }}
           className="glass-panel border-2 border-dashed border-zinc-700 rounded-3xl p-12 flex flex-col items-center justify-center text-center mt-12 transition-colors group hover:border-indigo-500/50 hover:bg-zinc-800/50 cursor-pointer block"
         >
@@ -163,7 +145,9 @@ export default function UploadPage() {
             }}
             onChange={(e) => {
               console.log("onChange fired via ref!");
-              handleFileChange(e);
+              handleFileChange(e).then(() => {
+                console.log("Fayl muvaffaqiyatli yuklandi!");
+              });
             }}
             className="sr-only" 
             accept=".pdf,.doc,.docx,.txt"
@@ -325,36 +309,6 @@ export default function UploadPage() {
           </div>
           <h2 className="text-xl font-bold text-zinc-100 mb-2">{d.generating_title}</h2>
           <p className="text-sm text-zinc-500">{d.generating_desc}</p>
-        </div>
-      )}
-
-      {/* STEP: SUCCESS */}
-      {step === "success" && (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-in zoom-in-95 fade-in duration-300">
-          <div className="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center mb-6 text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]">
-             <CheckCircle2 size={48} strokeWidth={2.5} />
-          </div>
-          <h2 className="text-xl font-bold text-zinc-100 mb-2">{d.success_title}</h2>
-          <p className="text-sm text-zinc-400 mb-4">{quizName}</p>
-          
-          <div className="bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-full text-indigo-400 text-xs font-bold mb-12 flex items-center gap-1">
-             <span className="w-2 h-2 rounded-full bg-indigo-500" />
-             {numQuestions} {d.questions_badge}
-          </div>
-
-          <button 
-            onClick={() => router.push("/library")}
-            className="w-full max-w-xs bg-[#58CC02] hover:bg-[#58CC02]/90 text-white font-bold py-4 rounded-2xl interactive shadow-[0_4px_0_#46A302] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 mb-4"
-          >
-            {d.view_my_quizzes_btn}
-          </button>
-
-          <button 
-            onClick={() => setStep("upload")}
-            className="w-full max-w-xs glass-panel text-zinc-300 font-bold py-4 rounded-2xl interactive transition-all hover:bg-zinc-800/80"
-          >
-            {d.create_another_btn}
-          </button>
         </div>
       )}
     </div>

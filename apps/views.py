@@ -3,21 +3,17 @@ from datetime import timedelta
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.utils import timezone
-
 from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.parsers import MultiPartParser, FormParser
-
-from rest_framework.response import Response
 from rest_framework import status
-import json
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import viewsets, mixins
 
+from apps.models.users import User
+from .models import Quiz, QuizAttempt, Flashcard, Lobby, Document, GenerationRequest
 from .models.payments import Payment, SubscriptionPlan
 from .serializers import PaymentModelSerializer, SubscriptionModelSerializer
-from .models import Quiz, Question, Option, QuizAttempt, Flashcard, Lobby, Document, GenerationRequest
-from apps.ai_service import extract_text_from_pdf, generate_quiz_from_text
-from apps.models.users import User
 from .serializers import (
     QuizAttemptSerializer, QuizSerializer, FlashcardSerializer,
     LobbySerializer, DocumentSerializer, GenerationRequestSerializer,
@@ -25,7 +21,7 @@ from .serializers import (
 )
 
 
-class UserModelViewSet(ModelViewSet):
+class UserModelViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -35,13 +31,13 @@ class UserModelViewSet(ModelViewSet):
         return qs.filter(id=self.request.user.id)
 
 
-class QuizModelViewSet(ModelViewSet):
+class QuizModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Quiz.objects.all().order_by('-created_on')
     serializer_class = QuizSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class QuizAttemptModelViewSet(ModelViewSet):
+class QuizAttemptModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = QuizAttempt.objects.all().order_by('-completed_at')
     serializer_class = QuizAttemptSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -51,13 +47,13 @@ class QuizAttemptModelViewSet(ModelViewSet):
         return qs.filter(user=self.request.user)
 
 
-class FlashcardModelViewSet(ModelViewSet):
+class FlashcardModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Flashcard.objects.all().order_by('order')
     serializer_class = FlashcardSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
-class LobbyModelViewSet(ModelViewSet):
+class LobbyModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Lobby.objects.all().order_by('-created_at')
     serializer_class = LobbySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -69,11 +65,11 @@ class LobbyModelViewSet(ModelViewSet):
         return qs.filter(is_public=True)
 
 
-class DocumentModelViewSet(ModelViewSet):
+class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Document.objects.all().order_by('-uploaded_at')
     serializer_class = DocumentSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -118,21 +114,25 @@ class DocumentModelViewSet(ModelViewSet):
         
         from apps.tasks import generate_quiz_background
         
-        # Trigger celery task
-        task = generate_quiz_background.delay(document.id, num_questions, quiz_name)
-        
-        document.task_id = task.id
-        document.status = 'generating'
-        document.save()
-        
-        return Response({
-            "message": "Quiz generation started",
-            "task_id": task.id,
-            "document_id": document.id
-        })
+        try:
+            # Run generation synchronously to avoid needing celery/redis locally
+            result = generate_quiz_background(document.id, num_questions, quiz_name)
+            
+            # document status is updated inside the task
+            document.refresh_from_db()
+            
+            return Response({
+                "message": "Quiz generation completed",
+                "document_id": document.id
+            })
+        except Exception as e:
+            return Response({
+                "error": "Failed to generate quiz: " + str(e),
+                "detail": "This is often due to an API rate limit. Please try again in a few seconds."
+            }, status=400)
 
 
-class GenerationRequestModelViewSet(ModelViewSet):
+class GenerationRequestModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = GenerationRequest.objects.all()
     serializer_class = GenerationRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -142,7 +142,7 @@ class GenerationRequestModelViewSet(ModelViewSet):
         return qs.filter(user=self.request.user)
 
 
-class PaymentModelViewSet(ModelViewSet):
+class PaymentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = Payment.objects.all()
     serializer_class = PaymentModelSerializer
     permission_classes = [IsAuthenticated]
@@ -152,7 +152,7 @@ class PaymentModelViewSet(ModelViewSet):
         return qs.filter(user=self.request.user)
 
 
-class SubscriptionPlanModelViewSet(ModelViewSet):
+class SubscriptionPlanModelViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = SubscriptionPlan.objects.all()
     serializer_class = SubscriptionModelSerializer
     permission_classes = [IsAuthenticated]

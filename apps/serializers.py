@@ -1,9 +1,8 @@
 from rest_framework.serializers import CharField, CurrentUserDefault, HiddenField, ModelSerializer, IntegerField, \
     SerializerMethodField
 
-from .models.payments import Payment, SubscriptionPlan
-from .models import Option, Question, Quiz, QuizAttempt, Flashcard, Lobby, LobbyParticipant, Document, GenerationRequest
-from apps.models.users import User
+from apps.models import User, Payment, SubscriptionPlan, Option, Question, Quiz, QuizAttempt, Flashcard, Lobby, \
+    LobbyParticipant, Document, GenerationRequest
 
 
 class UserSerializer(ModelSerializer):
@@ -88,7 +87,8 @@ class DocumentSerializer(ModelSerializer):
 
     class Meta:
         model = Document
-        fields = ['id', 'user', 'file', 'file_name', 'file_size', 'uploaded_at', 'status', 'task_id', 'detected_question_count']
+        fields = ['id', 'user', 'file', 'file_name', 'file_size', 'uploaded_at', 'status', 'task_id',
+                  'detected_question_count']
 
     def create(self, validated_data):
         file = validated_data.get('file')

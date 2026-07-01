@@ -1,6 +1,5 @@
 from django.db.models import Model, ForeignKey, CASCADE
 from django.db.models.fields import CharField, TextField, BooleanField, DateTimeField, IntegerField
-from django.conf import settings
 
 
 class Quiz(Model):

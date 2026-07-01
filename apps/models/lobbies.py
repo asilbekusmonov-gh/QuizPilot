@@ -1,6 +1,6 @@
 from django.db.models import Model, ForeignKey, CASCADE, TextChoices
 from django.db.models.fields import CharField, BooleanField, IntegerField, DateTimeField
-from django.conf import settings
+
 
 class Lobby(Model):
     class StatusChoices(TextChoices):
@@ -15,6 +15,7 @@ class Lobby(Model):
     status = CharField(max_length=20, choices=StatusChoices.choices, default=StatusChoices.WAITING)
     teacher_mode = BooleanField(default=False)
     created_at = DateTimeField(auto_now_add=True)
+
 
 class LobbyParticipant(Model):
     lobby = ForeignKey("apps.Lobby", on_delete=CASCADE, related_name='participants')
