@@ -16,6 +16,10 @@ export default function BottomNav() {
     { label: dict.nav.premium, href: "/premium", icon: Crown },
   ];
 
+  if (pathname.startsWith("/play/")) {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[92%] max-w-md glass-nav rounded-[2rem] px-2 py-3.5 z-50 shadow-[0_20px_40px_rgba(0,0,0,0.5)]">
       <ul className="flex justify-around items-center w-full">

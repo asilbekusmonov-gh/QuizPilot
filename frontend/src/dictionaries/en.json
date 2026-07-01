@@ -115,7 +115,15 @@
     "items": "items",
     "by": "by",
     "public": "PUBLIC",
-    "private": "PRIVATE"
+    "private": "PRIVATE",
+    "feed": "Feed",
+    "mine": "Mine",
+    "publish_modal_title": "Publish your quizzes",
+    "make_public": "MAKE PUBLIC",
+    "pick_category": "Pick a category",
+    "publish_btn": "Publish",
+    "cancel": "Cancel",
+    "no_published": "You haven't published any quizzes yet."
   },
   "create_prompt": {
     "title": "Prompt to Quiz",

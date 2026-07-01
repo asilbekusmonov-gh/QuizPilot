@@ -1,0 +1,97 @@
+git add .
+git commit -m "feat: added new database models"
+
+
+
+# 1. Switch back to your main branch
+git checkout main
+
+# 2. Bring all the "collected" work from dev into main
+git merge dev
+
+# 3. Push it to your GitHub repository! (You only need to add the remote link the very first time)
+git remote add origin https://github.com/asilbekusmonov-gh/QuizPilot.git
+git push -u origin main
+
+# 4. Switch back to dev to continue your next daily work
+git checkout dev
+
+
+
+
+
+cd frontend
+npm run dev
+
+
+uv run celery -A root worker -l INFO
+
+-------------
+
+
+
+# 🚀 QuizPilot Backend Master Roadmap
+
+Since I (the AI) will be handling all the Next.js Frontend wiring, your ONLY job is to build the Django API infrastructure.
+
+Here is your strict, step-by-step master plan for the Backend. Once you finish an endpoint, tell me, and I will connect the frontend to it!
+
+---
+
+## Phase 1: User Authentication & Profiles
+*Before we can save scores or charge money, we need to know WHO the user is.*
+
+- [ ] **Install JWT:** Install `djangorestframework-simplejwt` and configure it in your `settings.py`. This will give you the `/api/token/` and `/api/token/refresh/` endpoints automatically.
+- [ ] **User Profile API:** Create a new Django view `GET /api/v1/users/me/`. When a user sends their JWT token, this view should return their `username`, `role`, `credits`, and `is_premium` status.
+- [ ] **Update Quiz APIs:** Go back to your `QuizModelViewSet` and ensure that `permission_classes = [IsAuthenticated]` is strictly enforced for creating quizzes.
+
+> 🛑 *Once you finish Phase 1, tell me! I will write the Next.js code to log the user in and connect the Settings page to your `/users/me/` endpoint.*
+
+---
+
+## Phase 2: The AI Engine (The "Brain")
+*The core feature of QuizPilot: generating quizzes from PDFs.*
+
+- [ ] **PDF Upload Endpoint:** Write a custom Django view (e.g., `POST /api/v1/generate-quiz/`) that accepts a `.pdf` file in the request.
+- [ ] **Extract Text:** Install a Python library like `PyPDF2` or `pdfplumber`. Write a helper function in Django to extract all text from the uploaded PDF.
+- [ ] **OpenAI Integration:** Install the `openai` python package. Send the extracted text to OpenAI with a strict prompt asking it to return 10 multiple-choice questions in a specific JSON format.
+- [ ] **Database Saving:** Write logic in your view to parse OpenAI's JSON response and automatically create the `Quiz`, `Question`, and `Option` rows in your PostgreSQL database. Return the new `quiz_id` in the API response.
+
+> 🛑 *Once you finish Phase 2, tell me! I will write the Next.js code for the Upload Page to send PDFs to your endpoint and handle the loading animations.*
+
+---
+
+## Phase 3: Monetization (Premium Features)
+*Now that the AI works, let's charge them.*
+
+- [ ] **Subscription Model:** Create a `Subscription` model (`apps/models/payments.py`) to track active premium users.
+- [ ] **Premium API Endpoint:** Create a Django endpoint `POST /api/v1/subscribe/` that upgrades a user to Premium.
+- [ ] **Enforce Limits:** Go back to your Phase 2 AI Endpoint. Add logic to check if `request.user.is_premium` is True. If False, check if they have `request.user.credits > 0`. If 0, return an HTTP 403 Forbidden error! If they have credits, subtract 1 credit and save the user.
+
+> 🛑 *Once you finish Phase 3, tell me! I will connect the Next.js Premium page to trigger your subscribe endpoint.*
+
+---
+
+## Phase 4: Production Deployment
+*Getting Django ready for the real world so Telegram can access it.*
+
+- [ ] **Host Backend:** Deploy your Django app to a service like **Railway** or **Render**.
+- [ ] **Security Settings:** Update `settings.py` to turn `DEBUG = False` and add your Railway URL to `ALLOWED_HOSTS`.
+- [ ] **Static Files:** Configure `whitenoise` in Django so your Admin Panel CSS loads correctly in production.
+
+> 🛑 *Once you finish Phase 4, give me your production URL. I will deploy the Next.js frontend to Vercel, point it to your production API, and give you the final URL to paste into Telegram's BotFather!*
+
+
+cd frontend
+npm run dev
+----------------------------Tasks---------------------------------
+
+
+
+
+
+
+
+
+
+

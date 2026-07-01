@@ -3,8 +3,8 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'root.settings')
 django.setup()
 
-from apps.models.users import User
-from rest_framework_simplejwt.tokens import RefreshToken
+from apps.models.users import User  # noqa: E402
+from rest_framework_simplejwt.tokens import RefreshToken  # noqa: E402
 
 try:
     user = User.objects.get(username='asilbek')

@@ -5,7 +5,7 @@ import warnings
 
 # Suppress the deprecation warning from the old SDK to keep console clean
 warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
-import google.generativeai as genai
+import google.generativeai as genai  # noqa: E402
 
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -51,6 +51,21 @@ def generate_quiz_from_text(text, num_questions=10):
     Read the following text and generate exactly {num_questions} multiple-choice questions.
     Return ONLY a JSON array with this exact structure:
     [{{ "question": "...", "options": ["A", "B", "C", "D"], "correct_answer": "B" }}]
+    
+    Text: {text[:10000]}
+    """
+    response = model.generate_content(prompt)
+    return response.text
+
+
+def generate_flashcards_from_text(text, num_cards=10):
+    """Sends the text to Gemini and asks for a JSON array of flashcards."""
+
+    prompt = f"""
+    Read the following text and generate exactly {num_cards} distinct flashcards to help study this material.
+    Extract the most important concepts, terms, or facts.
+    Return ONLY a JSON array with this exact structure:
+    [{{ "front": "Concept or Term", "back": "Definition or Explanation" }}]
     
     Text: {text[:10000]}
     """

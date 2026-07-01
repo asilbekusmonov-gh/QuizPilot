@@ -5,3 +5,4 @@ from .payments import Payment, SubscriptionPlan
 from .lobbies import Lobby, LobbyParticipant
 from .documents import Document
 from .prompts import GenerationRequest
+from .public import Public

@@ -3,12 +3,15 @@ import { apiFetch } from "@/lib/api";
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronLeft, FileUp, Loader2, CheckCircle2, AlertTriangle, Hash, CheckSquare, Sparkles } from "lucide-react";
 
 export default function UploadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const genType = searchParams.get('type') || 'quiz';
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { dict } = useLanguage();
   const d = dict.create_upload;
@@ -80,13 +83,18 @@ export default function UploadPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           num_questions: numQuestions,
-          quiz_name: quizName
+          quiz_name: quizName,
+          type: genType
         }),
       });
 
       if (res.ok) {
         // Automatically move to the library page
-        router.push("/library");
+        if (genType === 'flashcard') {
+          router.push("/library?tab=2");
+        } else {
+          router.push("/library");
+        }
       } else {
         const errData = await res.json();
         setErrorText("Error: " + JSON.stringify(errData));
@@ -140,6 +148,7 @@ export default function UploadPage() {
             ref={fileInputRef}
             type="file" 
             onClick={(e) => { 
+              e.stopPropagation();
               (e.target as HTMLInputElement).value = ''; 
               console.log("Input clicked, value cleared!"); 
             }}
@@ -192,7 +201,11 @@ export default function UploadPage() {
           <div className="glass-panel rounded-2xl p-4 flex items-center gap-4 border border-green-500/30">
             <div className="text-4xl font-bold text-indigo-400 ml-2">{numQuestions}</div>
             <div className="flex-1">
-              <h3 className="font-semibold text-zinc-100">{d.detected_title?.replace('{count}', numQuestions.toString()) || `Found ${numQuestions} questions`}</h3>
+              <h3 className="font-semibold text-zinc-100">
+                {genType === 'flashcard' 
+                  ? `Found approximately ${numQuestions} flashcards` 
+                  : (d.detected_title?.replace('{count}', numQuestions.toString()) || `Found ${numQuestions} questions`)}
+              </h3>
               <p className="text-xs text-zinc-500">{d.detected_desc}</p>
             </div>
             <CheckCircle2 className="text-green-500 w-6 h-6 mr-2" />
@@ -239,37 +252,41 @@ export default function UploadPage() {
           </div>
 
           {/* Segmented Control */}
-          <div className="flex bg-zinc-900/80 p-1 rounded-2xl border border-zinc-800 mt-2">
-            <button 
-              onClick={() => setQuizType("single")}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all interactive ${
-                quizType === "single" 
-                  ? "bg-indigo-500 text-white shadow-md" 
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              {d.single_quiz_tab}
-            </button>
-            <button 
-              onClick={() => setQuizType("multiple")}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all interactive ${
-                quizType === "multiple" 
-                  ? "bg-indigo-500 text-white shadow-md" 
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              {d.multi_group_tab}
-            </button>
-          </div>
+          {genType !== 'flashcard' && (
+            <div className="flex bg-zinc-900/80 p-1 rounded-2xl border border-zinc-800 mt-2">
+              <button 
+                onClick={() => setQuizType("single")}
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all interactive ${
+                  quizType === "single" 
+                    ? "bg-indigo-500 text-white shadow-md" 
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {d.single_quiz_tab}
+              </button>
+              <button 
+                onClick={() => setQuizType("multiple")}
+                className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all interactive ${
+                  quizType === "multiple" 
+                    ? "bg-indigo-500 text-white shadow-md" 
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {d.multi_group_tab}
+              </button>
+            </div>
+          )}
 
           {/* Info block */}
-          <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800/50">
-             <p className="text-xs text-zinc-400 font-semibold mb-1">{d.whats_the_difference}</p>
-             <ul className="text-xs text-zinc-500 space-y-1">
-               <li>• <strong className="text-zinc-300">{d.single_quiz_tab}</strong> — {d.single_quiz_desc}</li>
-               <li>• <strong className="text-zinc-300">{d.multi_group_tab}</strong> — {d.multi_group_desc}</li>
-             </ul>
-          </div>
+          {genType !== 'flashcard' && (
+            <div className="bg-zinc-900/50 rounded-2xl p-4 border border-zinc-800/50">
+               <p className="text-xs text-zinc-400 font-semibold mb-1">{d.whats_the_difference}</p>
+               <ul className="text-xs text-zinc-500 space-y-1">
+                 <li>• <strong className="text-zinc-300">{d.single_quiz_tab}</strong> — {d.single_quiz_desc}</li>
+                 <li>• <strong className="text-zinc-300">{d.multi_group_tab}</strong> — {d.multi_group_desc}</li>
+               </ul>
+            </div>
+          )}
 
           {/* Quiz Name */}
           <div className="mt-2">
@@ -295,7 +312,7 @@ export default function UploadPage() {
             className="w-full bg-[#58CC02] hover:bg-[#58CC02]/90 text-white font-bold py-4 rounded-2xl mt-2 interactive shadow-[0_4px_0_#46A302] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
           >
             <Sparkles size={18} />
-            {d.generate_btn}
+            {genType === 'flashcard' ? "Generate Flashcards" : d.generate_btn}
           </button>
         </div>
       )}

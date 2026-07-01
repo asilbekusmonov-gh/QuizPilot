@@ -4,12 +4,14 @@ QuizPilot is a modern, full-stack web application designed for creating, managin
 
 ## 🌟 Key Features
 
-*   **Interactive Quizzes & Flashcards**: Create varied question types and flashcards for comprehensive learning.
-*   **Multiplayer Lobbies**: Host live games (like Kahoot/Quizizz) where participants can join, play, and compete in real-time.
+*   **Interactive Quizzes & Flashcards**: Create varied question types and flashcards for comprehensive learning. Includes a custom study mode with "Learning" and "Mastered" queue systems.
+*   **AI-Powered Generation**: Instantly generate both standard quizzes and flashcard decks from PDFs or text prompts using Gemini AI in the background.
+*   **Multiplayer Lobbies (Jonli O'yinlar)**: Host live games where participants can join via a 6-digit code, wait in a synced waiting room, and play in real-time.
 *   **Premium Subscriptions**: Advanced features including AI-powered quiz generation from PDFs, increased limits, and more.
 *   **Multi-language Support**: Fully localized interface supporting English, Russian, and Uzbek, built with a custom lightweight React Context system.
 *   **Apple-style Bento Redesign**: A premium, bouncy, and highly visual frontend experience powered by Next.js and Tailwind CSS.
 *   **RESTful API**: A robust Django backend securely handling all business logic, payments, and data persistence.
+
 
 ## 💻 Tech Stack
 
@@ -17,6 +19,8 @@ QuizPilot is a modern, full-stack web application designed for creating, managin
 *   **Framework**: Django 6.0+ & Django REST Framework (DRF)
 *   **Database**: PostgreSQL
 *   **Authentication**: JWT (JSON Web Tokens) via `djangorestframework-simplejwt`
+*   **Background Tasks**: Celery & Redis (for AI document processing)
+*   **AI Integration**: Google Gemini API
 *   **Package Manager**: `uv` (Fast Python package installer and resolver)
 *   **Language**: Python 3.13+
 

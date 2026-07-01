@@ -2,7 +2,7 @@ from rest_framework.serializers import CharField, CurrentUserDefault, HiddenFiel
     SerializerMethodField
 
 from apps.models import User, Payment, SubscriptionPlan, Option, Question, Quiz, QuizAttempt, Flashcard, Lobby, \
-    LobbyParticipant, Document, GenerationRequest
+    LobbyParticipant, Document, GenerationRequest, Public
 
 
 class UserSerializer(ModelSerializer):
@@ -49,6 +49,21 @@ class QuizSerializer(ModelSerializer):
                   'questions', 'flashcards']
 
 
+class PublicSerializer(ModelSerializer):
+    quiz_details = QuizSerializer(source='quiz', read_only=True)
+
+    class Meta:
+        model = Public
+        fields = ['id', 'title', 'quiz', 'quiz_details']
+
+
+class PublicCreateSerializer(ModelSerializer):
+    class Meta:
+        model = Public
+        fields = ['id', 'title', 'quiz']
+
+
+
 class QuizAttemptSerializer(ModelSerializer):
     quiz_title = CharField(source='quiz.title', read_only=True)
     username = CharField(source='user.username', read_only=True)
@@ -76,7 +91,7 @@ class LobbySerializer(ModelSerializer):
 
     class Meta:
         model = Lobby
-        fields = ['id', 'host', 'host_username', 'quiz', 'quiz_title', 'is_public', 'total_time', 'status',
+        fields = ['id', 'host', 'host_username', 'quiz', 'quiz_title', 'is_public', 'join_code', 'total_time', 'status',
                   'teacher_mode', 'created_at', 'participants']
 
 

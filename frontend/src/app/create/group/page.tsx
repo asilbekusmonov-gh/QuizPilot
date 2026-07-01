@@ -123,7 +123,12 @@ export default function GroupQuizPage() {
       {/* Content based on Tab */}
       {tab === 'join' ? (
         <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <div className="relative">
+          
+          <Link href="/play/group/join" className="w-full bg-[#75a6f9] hover:bg-[#5b95f7] text-white font-bold py-4 rounded-2xl shadow-sm interactive flex justify-center items-center gap-2 transition-all">
+            Join by Code
+          </Link>
+          
+          <div className="relative mt-2">
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
             <input 
               type="text" 

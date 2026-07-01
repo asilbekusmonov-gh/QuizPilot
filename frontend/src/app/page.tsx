@@ -76,7 +76,7 @@ export default function CreatePage() {
 
         {/* Flashcards */}
         <Link 
-          href="/create/upload"
+          href="/create/upload?type=flashcard"
           className="col-span-1 bento-card bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
         >
           <div className="relative z-10 text-right flex justify-end">

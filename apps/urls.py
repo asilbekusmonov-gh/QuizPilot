@@ -5,7 +5,7 @@ from .views import (
     QuizAttemptModelViewSet, QuizModelViewSet,
     FlashcardModelViewSet, LobbyModelViewSet,
     DocumentModelViewSet, GenerationRequestModelViewSet,
-    UserModelViewSet, SubscriptionPlanModelViewSet, PaymentModelViewSet
+    UserModelViewSet, SubscriptionPlanModelViewSet, PaymentModelViewSet, PublicViewSet
 )
 
 router = DefaultRouter()
@@ -18,6 +18,7 @@ router.register(r'documents', DocumentModelViewSet, basename='document')
 router.register(r'generations', GenerationRequestModelViewSet, basename='generation')
 router.register(r'subscriptions', SubscriptionPlanModelViewSet, basename='subscription')
 router.register(r'payments', PaymentModelViewSet, basename='payment')
+router.register(r'public', PublicViewSet, basename='public')
 
 urlpatterns = [
     path('', include(router.urls)),

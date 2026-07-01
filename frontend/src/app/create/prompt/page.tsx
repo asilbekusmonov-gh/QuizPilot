@@ -17,26 +17,10 @@ export default function PromptPage() {
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     setIsGenerating(true);
-    try {
-      const res = await apiFetch("http://127.0.0.1:8000/api/v1/generations/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Add authorization header if needed
-        },
-        body: JSON.stringify({ prompt, num_questions: questions }),
-      });
-      if (res.ok) {
-        // Ideally the API would return a generated quiz ID, then we redirect to it
-        // const data = await res.json();
-        // router.push(`/library/${data.quiz_id}`);
-        router.push("/library");
-      }
-    } catch (error) {
-      console.error("Failed to generate quiz:", error);
-    } finally {
-      setIsGenerating(false);
-    }
+    // Simulate a brief loading state before redirecting
+    setTimeout(() => {
+      router.push("/premium");
+    }, 500);
   };
 
   return (

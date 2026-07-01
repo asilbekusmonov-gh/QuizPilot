@@ -115,7 +115,15 @@
     "items": "savol",
     "by": "tomondan",
     "public": "OMMAVIY",
-    "private": "XUSUSIY"
+    "private": "XUSUSIY",
+    "feed": "Lenta",
+    "mine": "Meniki",
+    "publish_modal_title": "Viktorinalaringizni chop eting",
+    "make_public": "OMMAVIY QILISH",
+    "pick_category": "Toifani tanlang",
+    "publish_btn": "Chop etish",
+    "cancel": "Bekor qilish",
+    "no_published": "Siz hali birorta ham viktorina chop etmadingiz."
   },
   "create_prompt": {
     "title": "Mavzudan viktorina",

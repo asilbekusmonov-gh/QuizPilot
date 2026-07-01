@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
 load_dotenv(".env")
-import google.generativeai as genai
-import warnings
+import google.generativeai as genai  # noqa: E402
+import warnings  # noqa: E402
 warnings.filterwarnings("ignore")
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
