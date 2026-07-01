@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { HelpCircle, Star, FileText, MessageSquare, Layers, Presentation, Gamepad2 } from "lucide-react";
+import { HelpCircle, Star, FileText, MessageSquare, Layers, Presentation, Gamepad2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function CreatePage() {

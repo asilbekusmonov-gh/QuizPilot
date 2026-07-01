@@ -1,5 +1,9 @@
 from datetime import timedelta
 
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from apps.telegram_utils import validate_telegram_data
 from django.db.models import Q
 from django.db.models.aggregates import Count
 from django.utils import timezone
@@ -276,12 +280,6 @@ class SubscriptionPlanModelViewSet(viewsets.ReadOnlyModelViewSet):
         return qs.annotate(today_sales=Count('payments', filter=Q(payments__created_at__gte=last_24_hour)))
 
 
-from rest_framework.views import APIView
-from django.conf import settings
-from rest_framework_simplejwt.tokens import RefreshToken
-from apps.models import User
-from apps.telegram_utils import validate_telegram_data
-from rest_framework import status
 
 class TelegramAuthView(APIView):
     permission_classes = []

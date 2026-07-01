@@ -150,9 +150,9 @@ CORS_ALLOWED_ORIGINS = [
 
 # Celery Configuration Options
 
-TELEGRAM_BOT_TOKEN = config("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
-CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 CELERY_TIMEZONE = "UTC"
