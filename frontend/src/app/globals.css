@@ -102,4 +102,30 @@ h1, h2, h3, h4, h5, h6 {
   .bento-card:hover .ios-sticker-emoji.flip {
     transform: scale(1.15) rotate(8deg);
   }
+
+  .spotlight {
+    position: relative;
+  }
+  
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      800px circle at var(--mouse-x) var(--mouse-y),
+      rgba(255, 255, 255, 0.06),
+      transparent 40%
+    );
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .spotlight:hover::before {
+    opacity: 1;
+  }
 }

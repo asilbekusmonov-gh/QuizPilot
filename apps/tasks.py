@@ -3,7 +3,7 @@ from celery import shared_task
 from apps.models import Document, Quiz, Question, Option, Flashcard, Slide
 from apps.ai_service import extract_text_from_pdf, generate_quiz_from_text, generate_flashcards_from_text, generate_slides_from_text
 
-@shared_task
+@shared_task(rate_limit="15/m")
 def generate_quiz_background(document_id, num_questions, quiz_name):
     try:
         document = Document.objects.get(id=document_id)
@@ -57,7 +57,7 @@ def generate_quiz_background(document_id, num_questions, quiz_name):
         raise e
 
 
-@shared_task
+@shared_task(rate_limit="15/m")
 def generate_flashcards_background(document_id, num_cards, quiz_name):
     try:
         document = Document.objects.get(id=document_id)
@@ -102,7 +102,7 @@ def generate_flashcards_background(document_id, num_cards, quiz_name):
         raise e
 
 
-@shared_task
+@shared_task(rate_limit="15/m")
 def generate_slides_background(document_id, num_slides, quiz_name):
     try:
         document = Document.objects.get(id=document_id)

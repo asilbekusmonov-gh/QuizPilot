@@ -39,6 +39,11 @@ class UserModelViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixin
         qs = super().get_queryset()
         return qs.filter(id=self.request.user.id)
 
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data)
+
 
 class QuizModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
                        mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -224,24 +229,21 @@ class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, m
         from apps.tasks import generate_quiz_background, generate_flashcards_background, generate_slides_background
 
         try:
-            # Run generation synchronously to avoid needing celery/redis locally
+            # Queue generation task in celery
             if gen_type in ['flashcard', 'flashcards']:
-                generate_flashcards_background(document.id, num_questions, quiz_name)
+                generate_flashcards_background.delay(document.id, num_questions, quiz_name)
             elif gen_type in ['slide', 'slides']:
-                generate_slides_background(document.id, num_questions, quiz_name)
+                generate_slides_background.delay(document.id, num_questions, quiz_name)
             else:
-                generate_quiz_background(document.id, num_questions, quiz_name)
-
-            # document status is updated inside the task
-            document.refresh_from_db()
+                generate_quiz_background.delay(document.id, num_questions, quiz_name)
 
             return Response({
-                "message": f"Successfully generated {gen_type}",
+                "message": f"Successfully queued {gen_type}",
                 "document_id": document.id
             })
         except Exception as e:
             return Response({
-                "error": f"Failed to generate {gen_type}: " + str(e),
+                "error": f"Failed to queue {gen_type}: " + str(e),
                 "detail": "This is often due to an API rate limit. Please try again in a few seconds."
             }, status=400)
 
@@ -321,4 +323,3 @@ class TelegramAuthView(APIView):
                 'credits': user.credits
             }
         })
-

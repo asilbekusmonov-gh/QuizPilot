@@ -57,3 +57,25 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('user', 'plan', 'is_active', 'expiry_date', 'created_at')
     list_filter = ('is_active', 'plan')
     search_fields = ('user__username', 'plan__name')
+
+
+# --- Custom Admin Dashboard ---
+from django.utils import timezone
+from django.db.models import Sum
+
+original_index = admin.site.index
+
+def custom_index(request, extra_context=None):
+    today = timezone.now().date()
+    extra_context = extra_context or {}
+    extra_context.update({
+        'total_users': User.objects.count(),
+        'total_quizzes': Quiz.objects.count(),
+        'quizzes_today': Quiz.objects.filter(created_on__date=today).count(),
+        'active_subscriptions': Payment.objects.filter(is_active=True).count(),
+        'revenue_today': Payment.objects.filter(created_at__date=today).aggregate(Sum('plan__price'))['plan__price__sum'] or 0
+    })
+    return original_index(request, extra_context)
+
+admin.site.index = custom_index
+admin.site.index_template = "admin/custom_index.html"

@@ -71,10 +71,42 @@ export default function UploadPage() {
     }
   };
 
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
+
+  const startPolling = (docId: number) => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await apiFetch(`http://127.0.0.1:8000/api/v1/documents/${docId}/`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'completed') {
+            clearInterval(interval);
+            if (genType === 'flashcard' || genType === 'flashcards') {
+              router.push("/library?tab=2");
+            } else if (genType === 'slide' || genType === 'slides') {
+              router.push("/library?tab=3");
+            } else {
+              router.push("/library");
+            }
+          } else if (data.status === 'failed') {
+            clearInterval(interval);
+            setErrorText("AI Generation failed on the server. Please try again.");
+            setStep("settings");
+          } else {
+            setQueuePosition(data.queue_position);
+          }
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 2000);
+  };
+
   const handleGenerate = async () => {
     if (!documentId) return;
     setStep("generating");
     setErrorText("");
+    setQueuePosition(null);
     
     // Phase 2: Start Background Generation Task
     try {
@@ -89,14 +121,7 @@ export default function UploadPage() {
       });
 
       if (res.ok) {
-        // Automatically move to the library page
-        if (genType === 'flashcard' || genType === 'flashcards') {
-          router.push("/library?tab=2");
-        } else if (genType === 'slide' || genType === 'slides') {
-          router.push("/library?tab=3");
-        } else {
-          router.push("/library");
-        }
+        startPolling(documentId);
       } else {
         const errData = await res.json();
         setErrorText("Error: " + JSON.stringify(errData));
@@ -327,7 +352,13 @@ export default function UploadPage() {
              <Sparkles className="text-indigo-400 w-8 h-8 animate-pulse" />
           </div>
           <h2 className="text-xl font-bold text-zinc-100 mb-2">{d.generating_title}</h2>
-          <p className="text-sm text-zinc-500">{d.generating_desc}</p>
+          <p className="text-sm text-zinc-500 mb-6">{d.generating_desc}</p>
+          
+          {queuePosition !== null && queuePosition > 0 && (
+            <div className="bg-orange-500/20 border border-orange-500/30 text-orange-400 px-4 py-2 rounded-full font-semibold text-sm animate-pulse">
+              You are #{queuePosition} in queue
+            </div>
+          )}
         </div>
       )}
     </div>

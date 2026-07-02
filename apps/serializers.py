@@ -106,11 +106,18 @@ class DocumentSerializer(ModelSerializer):
     user = HiddenField(default=CurrentUserDefault())
     file_name = CharField(read_only=True)
     file_size = IntegerField(read_only=True)
+    queue_position = SerializerMethodField()
 
     class Meta:
         model = Document
         fields = ['id', 'user', 'file', 'file_name', 'file_size', 'uploaded_at', 'status', 'task_id',
-                  'detected_question_count']
+                  'detected_question_count', 'queue_position']
+
+    def get_queue_position(self, obj) -> int:
+        if obj.status == 'generating':
+            # Documents generating that were uploaded before this one
+            return Document.objects.filter(status='generating', uploaded_at__lt=obj.uploaded_at).count() + 1
+        return 0
 
     def create(self, validated_data):
         file = validated_data.get('file')

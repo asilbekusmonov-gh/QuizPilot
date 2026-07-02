@@ -3,19 +3,57 @@
 import Link from "next/link";
 import { HelpCircle, Star, FileText, MessageSquare, Layers, Presentation, Gamepad2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { motion, Variants } from "framer-motion";
+import { useRef } from "react";
+
+const container: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const item: Variants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+};
 
 export default function CreatePage() {
   const { dict } = useLanguage();
   const d = dict.home;
+  
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!gridRef.current) return;
+    const cards = gridRef.current.querySelectorAll('.bento-card');
+    for (const card of cards) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      (card as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+      (card as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+    }
+  };
 
   return (
-    <div className="pt-10 pb-36 animate-in relative min-h-screen bg-zinc-950">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="pt-10 pb-36 relative min-h-screen bg-zinc-950 overflow-hidden"
+    >
       
       {/* Background Soft Glows (Apple style) */}
       <div className="absolute top-0 left-0 w-full h-96 bg-indigo-500/10 blur-[120px] rounded-full z-0 pointer-events-none" />
 
       {/* Header section */}
-      <header className="flex justify-between items-center mb-8 px-4 relative z-10">
+      <motion.header 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="flex justify-between items-center mb-8 px-4 relative z-10"
+      >
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-full overflow-hidden shadow-lg border-2 border-zinc-800">
             <img src="https://ui-avatars.com/api/?name=Asilbek+Usmonov&background=27272a&color=fff" alt="User Avatar" className="w-full h-full object-cover" />
@@ -25,114 +63,162 @@ export default function CreatePage() {
             <h1 className="text-xl font-bold text-zinc-100 font-outfit tracking-tight">Asilbek</h1>
           </div>
         </div>
-        <div className="px-4 py-2 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg flex items-center gap-2 text-sm font-bold interactive cursor-pointer hover:bg-zinc-800 transition-colors">
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="px-4 py-2 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg flex items-center gap-2 text-sm font-bold interactive cursor-pointer hover:bg-zinc-800 transition-colors"
+        >
           <Star size={14} className="text-yellow-500 fill-yellow-500" />
           <span>1 {d.credit}</span>
-        </div>
-      </header>
+        </motion.div>
+      </motion.header>
 
       {/* Apple style large intro typography */}
-      <div className="px-4 mb-6 relative z-10">
+      <motion.div 
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 30 }}
+        className="px-4 mb-6 relative z-10"
+      >
         <h2 className="text-3xl font-extrabold text-zinc-100 tracking-tight font-outfit leading-tight">
           {d.hero_title_1} <br/> {d.hero_title_2}
         </h2>
-      </div>
+      </motion.div>
 
       {/* BENTO BOX GRID */}
-      <div className="grid grid-cols-2 gap-4 px-4 relative z-10">
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        ref={gridRef}
+        onMouseMove={handleMouseMove}
+        className="grid grid-cols-2 gap-4 px-4 relative z-10"
+      >
         
         {/* HERO: Upload PDF (Spans 2 columns) */}
-        <Link 
-          href="/create/upload"
-          className="col-span-2 bento-card bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2rem] p-6 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
-        >
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
-          <div className="relative z-10">
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.4)] transform -rotate-3 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
-              <FileText size={28} className="text-indigo-600 drop-shadow-sm" />
+        <Link href="/create/upload" className="col-span-2 block">
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="bento-card spotlight bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[2rem] p-6 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.4)] transform -rotate-3 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
+                <FileText size={28} className="text-indigo-600 drop-shadow-sm" />
+              </div>
             </div>
-          </div>
-          <div className="relative z-10 mt-6">
-            <h3 className="text-2xl font-bold text-white tracking-tight mb-1">{d.upload_pdf_title}</h3>
-            <p className="text-indigo-200 text-sm font-medium">{d.upload_pdf_desc}</p>
-          </div>
+            <div className="relative z-10 mt-6">
+              <h3 className="text-2xl font-bold text-white tracking-tight mb-1">{d.upload_pdf_title}</h3>
+              <p className="text-indigo-200 text-sm font-medium">{d.upload_pdf_desc}</p>
+            </div>
+          </motion.div>
         </Link>
 
         {/* Prompt to Quiz */}
-        <Link 
-          href="/create/prompt"
-          className="col-span-1 bento-card bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
-        >
-          <div className="relative z-10 text-right flex justify-end">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transform -rotate-6 group-hover:rotate-0 group-hover:scale-110 transition-all duration-300">
-              <MessageSquare size={24} className="text-white drop-shadow-md" />
+        <Link href="/create/prompt" className="col-span-1 block">
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            className="bento-card spotlight bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
+          >
+            <div className="relative z-10 text-right flex justify-end">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.5)] transform -rotate-6 group-hover:rotate-0 group-hover:scale-110 transition-all duration-300">
+                <MessageSquare size={24} className="text-white drop-shadow-md" />
+              </div>
             </div>
-          </div>
-          <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.prompt_title}</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.prompt_desc}</p>
-          </div>
+            <div className="relative z-10 mt-4">
+              <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.prompt_title}</h3>
+              <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.prompt_desc}</p>
+            </div>
+          </motion.div>
         </Link>
 
         {/* Flashcards */}
-        <Link 
-          href="/create/upload?type=flashcard"
-          className="col-span-1 bento-card bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
-        >
-          <div className="relative z-10 text-right flex justify-end">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.5)] transform rotate-6 group-hover:-rotate-3 group-hover:scale-110 transition-all duration-300">
-              <Layers size={24} className="text-white drop-shadow-md" />
+        <Link href="/create/upload?type=flashcard" className="col-span-1 block">
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            className="bento-card spotlight bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
+          >
+            <div className="relative z-10 text-right flex justify-end">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(249,115,22,0.5)] transform rotate-6 group-hover:-rotate-3 group-hover:scale-110 transition-all duration-300">
+                <Layers size={24} className="text-white drop-shadow-md" />
+              </div>
             </div>
-          </div>
-          <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.flashcards_title}</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.flashcards_desc}</p>
-          </div>
+            <div className="relative z-10 mt-4">
+              <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.flashcards_title}</h3>
+              <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.flashcards_desc}</p>
+            </div>
+          </motion.div>
         </Link>
 
         {/* AI Presentation */}
-        <Link 
-          href="/create/upload?type=slide"
-          className="col-span-1 bento-card bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5" />
-          <div className="relative z-10 text-right flex justify-end">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)] transform -rotate-3 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
-              <Sparkles size={24} className="text-white drop-shadow-md" />
+        <Link href="/create/upload?type=slide" className="col-span-1 block">
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            className="bento-card spotlight bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 pointer-events-none" />
+            <div className="relative z-10 text-right flex justify-end">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.5)] transform -rotate-3 group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
+                <Sparkles size={24} className="text-white drop-shadow-md" />
+              </div>
             </div>
-          </div>
-          <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.presentation_title || "AI Slides"}</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.presentation_desc || "Turn documents into decks"}</p>
-          </div>
+            <div className="relative z-10 mt-4">
+              <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{(d as any).presentation_title || "AI Slides"}</h3>
+              <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{(d as any).presentation_desc || "Turn documents into decks"}</p>
+            </div>
+          </motion.div>
         </Link>
 
         {/* Group Quiz */}
-        <Link 
-          href="/create/group"
-          className="col-span-1 bento-card bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5" />
-          <div className="relative z-10 text-right flex justify-end">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)] transform rotate-3 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-300">
-              <Gamepad2 size={24} className="text-white drop-shadow-md" />
+        <Link href="/create/group" className="col-span-1 block">
+          <motion.div 
+            variants={item}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            className="bento-card spotlight bg-zinc-900 rounded-[1.8rem] p-5 relative overflow-hidden group flex flex-col justify-between min-h-[160px]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 pointer-events-none" />
+            <div className="relative z-10 text-right flex justify-end">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.5)] transform rotate-3 group-hover:-rotate-6 group-hover:scale-110 transition-all duration-300">
+                <Gamepad2 size={24} className="text-white drop-shadow-md" />
+              </div>
             </div>
-          </div>
-          <div className="relative z-10 mt-4">
-            <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.live_games_title}</h3>
-            <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.live_games_desc}</p>
-          </div>
+            <div className="relative z-10 mt-4">
+              <h3 className="text-lg font-bold text-zinc-100 leading-tight mb-1">{d.live_games_title}</h3>
+              <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">{d.live_games_desc}</p>
+            </div>
+          </motion.div>
         </Link>
 
-      </div>
+      </motion.div>
 
       {/* How it works Button */}
-      <div className="mt-10 text-center relative z-10">
-        <Link href="/how-it-works" className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg text-zinc-400 text-sm font-bold hover:text-zinc-200 hover:bg-zinc-800 transition-all active:scale-95">
-          <HelpCircle size={16} /> {d.how_it_works}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, type: "spring" }}
+        className="mt-10 text-center relative z-10"
+      >
+        <Link href="/how-it-works">
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-900/80 backdrop-blur-md rounded-full shadow-lg text-zinc-400 text-sm font-bold hover:text-zinc-200 hover:bg-zinc-800 transition-colors border border-zinc-800/50"
+          >
+            <HelpCircle size={16} /> {d.how_it_works}
+          </motion.button>
         </Link>
-      </div>
+      </motion.div>
 
-    </div>
+    </motion.div>
   );
 }
+

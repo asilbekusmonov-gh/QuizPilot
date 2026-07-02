@@ -16,6 +16,14 @@ export default function SettingsPage() {
   const [userStats, setUserStats] = useState({ quizzes: 0, credits: 0 });
   const [userId, setUserId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("soundEnabled");
+    if (saved !== null) {
+      setSoundEnabled(saved === "true");
+    }
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -81,7 +89,11 @@ export default function SettingsPage() {
       )}
     ]},
     { title: d.sections.preferences, items: [
-      { label: d.preferences.sound_effects, desc: d.preferences.sound_effects_desc, type: "toggle", active: true }
+      { label: d.preferences.sound_effects, desc: d.preferences.sound_effects_desc, type: "toggle", active: soundEnabled, onClick: () => {
+        const newVal = !soundEnabled;
+        setSoundEnabled(newVal);
+        localStorage.setItem("soundEnabled", newVal.toString());
+      }}
     ]},
     { title: d.sections.about, items: [
       { label: d.about.help, icon: Headphones },
@@ -160,7 +172,7 @@ export default function SettingsPage() {
               item.type === 'custom' && item.render ? (
                 <div key={i}>{item.render()}</div>
               ) : (
-                <div key={i} className="p-4 flex justify-between items-center hover:bg-zinc-800/30 transition-colors interactive">
+                <div key={i} className={`p-4 flex justify-between items-center hover:bg-zinc-800/30 transition-colors interactive ${item.onClick ? 'cursor-pointer' : ''}`} onClick={item.onClick}>
                   <div>
                     <span className="font-medium text-[14px] text-zinc-200">{item.label}</span>
                     {item.desc && <p className="text-[11px] text-zinc-500 mt-0.5">{item.desc}</p>}
