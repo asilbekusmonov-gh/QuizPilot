@@ -154,3 +154,4 @@ CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 CELERY_TIMEZONE = "UTC"
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://pittsburgh-health-petersburg-illinois.trycloudflare.com')

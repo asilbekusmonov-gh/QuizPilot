@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { User, CreditCard, HelpCircle, Headphones, Info, ExternalLink, ChevronRight, Crown, Edit2, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -9,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function SettingsPage() {
   const { language, setLanguage, dict } = useLanguage();
   const d = dict.settings;
+  const router = useRouter();
 
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [userName, setUserName] = useState(d.loading);
@@ -35,16 +37,13 @@ export default function SettingsPage() {
 
     const fetchUser = async () => {
       try {
-        const res = await apiFetch("http://127.0.0.1:8000/api/v1/users/");
+        const res = await apiFetch("http://127.0.0.1:8000/api/v1/users/me/");
         if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            const user = data[0];
-            if (isMounted) {
-              setUserId(user.id);
-              setUserName(user.username);
-              setUserStats({ quizzes: user.quiz_count || 0, credits: user.credits || 0 });
-            }
+          const user = await res.json();
+          if (user && isMounted) {
+            setUserId(user.id);
+            setUserName(user.first_name || user.username || 'User');
+            setUserStats({ quizzes: user.quiz_count || 0, credits: user.credits || 0 });
           }
         }
       } catch (error) {
@@ -113,7 +112,11 @@ export default function SettingsPage() {
       }}
     ]},
     { title: d.sections.about, items: [
-      { label: d.about.help, icon: Headphones },
+      { label: d.about.help, icon: Headphones, onClick: () => {
+        const tg = (window as any).Telegram?.WebApp;
+        if (tg) tg.openTelegramLink('https://t.me/UsmonovAsiIbek');
+        else window.open('https://t.me/UsmonovAsiIbek', '_blank');
+      }},
       { label: d.about.version, value: "1.15.0", type: "value" },
       { label: d.about.terms, icon: ExternalLink },
       { label: d.about.privacy, icon: ExternalLink },
@@ -167,7 +170,11 @@ export default function SettingsPage() {
       </div>
 
       {/* Premium Banner */}
-      <div className="rounded-2xl p-4 mb-8 flex justify-between items-center text-white border border-indigo-500/30 interactive cursor-pointer hover:border-indigo-500/60 transition-colors group relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(168, 85, 247, 0.1))' }}>
+      <div 
+        onClick={() => router.push('/premium')}
+        className="rounded-2xl p-4 mb-8 flex justify-between items-center text-white border border-indigo-500/30 interactive cursor-pointer hover:border-indigo-500/60 transition-colors group relative overflow-hidden" 
+        style={{ background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(168, 85, 247, 0.1))' }}
+      >
         <div className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
             <Crown size={20} className="text-yellow-500" />
@@ -241,7 +248,12 @@ export default function SettingsPage() {
               <button 
                 onClick={() => {
                   console.log("App closing...");
-                  setShowCloseModal(false);
+                  const tg = (window as any).Telegram?.WebApp;
+                  if (tg) {
+                    tg.close();
+                  } else {
+                    setShowCloseModal(false);
+                  }
                 }}
                 className="flex-1 py-2.5 rounded-xl font-semibold text-sm text-white bg-teal-500 hover:bg-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.3)] transition-colors interactive"
               >

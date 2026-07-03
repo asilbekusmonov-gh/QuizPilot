@@ -159,8 +159,8 @@ export default function PremiumPage() {
                 )}
                 
                 <div className="flex items-center gap-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-yellow-500' : 'border-zinc-600'}`}>
-                    {isSelected && <div className="w-2.5 h-2.5 bg-yellow-500 rounded-full"></div>}
+                  <div className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-yellow-500' : 'border-zinc-600'}`}>
+                    {isSelected && <div className="w-2.5 h-2.5 shrink-0 bg-yellow-500 rounded-full"></div>}
                   </div>
                   <div>
                     <div className={titleContainerClass}>

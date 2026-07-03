@@ -195,13 +195,13 @@ class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, m
         document = serializer.save(user=request.user)
 
         try:
-            # 2. Extract text from the newly saved PDF
+            # 2. Extract content from the newly saved file
             file_path = document.file.path
-            from apps.ai_service import extract_text_from_pdf, detect_question_count_from_text
-            pdf_text = extract_text_from_pdf(file_path)
+            from apps.ai_service import extract_content, detect_question_count_from_text
+            content = extract_content(file_path)
 
             # 3. Detect number of questions
-            detected_count = detect_question_count_from_text(pdf_text)
+            detected_count = detect_question_count_from_text(content)
             document.detected_question_count = detected_count
             document.save()
 
@@ -222,9 +222,21 @@ class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, m
     @action(detail=True, methods=['post'])
     def generate(self, request, pk=None):
         document = self.get_object()
+        user = request.user
         num_questions = int(request.data.get('num_questions', 10))
         quiz_name = request.data.get('quiz_name', document.file_name)
         gen_type = request.data.get('type', 'quiz')
+
+        # Check Subscription / Credits
+        if not user.has_active_subscription:
+            if user.credits <= 0:
+                return Response({
+                    "error": "no_credits",
+                    "detail": "You do not have enough credits to generate this. Please upgrade to Premium."
+                }, status=status.HTTP_402_PAYMENT_REQUIRED)
+            else:
+                user.credits -= 1
+                user.save(update_fields=['credits'])
 
         from apps.tasks import generate_quiz_background, generate_flashcards_background, generate_slides_background
 
@@ -242,6 +254,11 @@ class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, m
                 "document_id": document.id
             })
         except Exception as e:
+            # Refund if queuing immediately fails
+            if not user.has_active_subscription:
+                user.credits += 1
+                user.save(update_fields=['credits'])
+                
             return Response({
                 "error": f"Failed to queue {gen_type}: " + str(e),
                 "detail": "This is often due to an API rate limit. Please try again in a few seconds."

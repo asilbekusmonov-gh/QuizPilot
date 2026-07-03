@@ -122,9 +122,11 @@ export default function UploadPage() {
 
       if (res.ok) {
         startPolling(documentId);
+      } else if (res.status === 402) {
+        router.push("/premium");
       } else {
         const errData = await res.json();
-        setErrorText("Error: " + JSON.stringify(errData));
+        setErrorText("Error: " + (errData.detail || JSON.stringify(errData)));
         setStep("settings");
       }
     } catch (error) {
@@ -155,8 +157,8 @@ export default function UploadPage() {
 
       {/* STEP: UPLOAD */}
       {step === "upload" && (
-        <div 
-          onClick={() => fileInputRef.current?.click()}
+        <label 
+          htmlFor="file-upload"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => {
             e.preventDefault();
@@ -172,6 +174,7 @@ export default function UploadPage() {
           className="glass-panel border-2 border-dashed border-zinc-700 rounded-3xl p-12 flex flex-col items-center justify-center text-center mt-12 transition-colors group hover:border-indigo-500/50 hover:bg-zinc-800/50 cursor-pointer block"
         >
           <input 
+            id="file-upload"
             ref={fileInputRef}
             type="file" 
             onClick={(e) => { 
@@ -180,13 +183,13 @@ export default function UploadPage() {
               console.log("Input clicked, value cleared!"); 
             }}
             onChange={(e) => {
-              console.log("onChange fired via ref!");
+              console.log("onChange fired via label!");
               handleFileChange(e).then(() => {
                 console.log("Fayl muvaffaqiyatli yuklandi!");
               });
             }}
             className="sr-only" 
-            accept=".pdf,.doc,.docx,.txt"
+            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
           />
           
           <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center text-indigo-400 mb-6 group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(99,102,241,0.15)]">
@@ -199,7 +202,7 @@ export default function UploadPage() {
           <div className="bg-indigo-600 group-hover:bg-indigo-500 text-white font-semibold py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all inline-block pointer-events-none">
             {d.choose_device}
           </div>
-        </div>
+        </label>
       )}
 
       {/* STEP: ANALYZING */}
@@ -209,7 +212,7 @@ export default function UploadPage() {
              <div className="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin" />
              <FileUp className="text-indigo-400 w-8 h-8" />
           </div>
-          <h2 className="text-xl font-bold text-zinc-100 mb-2">Analyzing PDF...</h2>
+          <h2 className="text-xl font-bold text-zinc-100 mb-2">Analyzing Document...</h2>
           <p className="text-sm text-zinc-500">Detecting questions with AI</p>
         </div>
       )}

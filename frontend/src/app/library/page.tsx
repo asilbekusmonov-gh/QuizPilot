@@ -85,7 +85,9 @@ export default function LibraryPage() {
         const res = await apiFetch("http://127.0.0.1:8000/api/v1/quizzes/");
         if (res.ok) {
           const data = await res.json();
-          if (isMounted) setQuizzes(data);
+          if (isMounted) {
+            setQuizzes(Array.isArray(data) ? data : data.results || []);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch quizzes:", error);

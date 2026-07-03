@@ -1,7 +1,7 @@
 import json
 from celery import shared_task
 from apps.models import Document, Quiz, Question, Option, Flashcard, Slide
-from apps.ai_service import extract_text_from_pdf, generate_quiz_from_text, generate_flashcards_from_text, generate_slides_from_text
+from apps.ai_service import extract_content, generate_quiz_from_text, generate_flashcards_from_text, generate_slides_from_text
 
 @shared_task(rate_limit="15/m")
 def generate_quiz_background(document_id, num_questions, quiz_name):
@@ -10,12 +10,12 @@ def generate_quiz_background(document_id, num_questions, quiz_name):
         document.status = 'generating'
         document.save()
 
-        # 1. Extract text
+        # 1. Extract content (text or image)
         file_path = document.file.path
-        pdf_text = extract_text_from_pdf(file_path)
+        content = extract_content(file_path)
 
         # 2. Call AI to generate quiz
-        quiz_json_string = generate_quiz_from_text(pdf_text, num_questions=num_questions)
+        quiz_json_string = generate_quiz_from_text(content, num_questions=num_questions)
         quiz_data = json.loads(quiz_json_string)
 
         # 3. Create database records
@@ -53,6 +53,12 @@ def generate_quiz_background(document_id, num_questions, quiz_name):
         if 'document' in locals():
             document.status = 'failed'
             document.save()
+            
+            # Refund logic
+            if not document.user.has_active_subscription:
+                document.user.credits += 1
+                document.user.save(update_fields=['credits'])
+
         print(f"Celery task failed for document {document_id}: {e}")
         raise e
 
@@ -64,12 +70,12 @@ def generate_flashcards_background(document_id, num_cards, quiz_name):
         document.status = 'generating'
         document.save()
 
-        # 1. Extract text
+        # 1. Extract content
         file_path = document.file.path
-        pdf_text = extract_text_from_pdf(file_path)
+        content = extract_content(file_path)
 
         # 2. Call AI to generate flashcards
-        cards_json_string = generate_flashcards_from_text(pdf_text, num_cards=num_cards)
+        cards_json_string = generate_flashcards_from_text(content, num_cards=num_cards)
         cards_data = json.loads(cards_json_string)
 
         # 3. Create database records
@@ -98,6 +104,12 @@ def generate_flashcards_background(document_id, num_cards, quiz_name):
         if 'document' in locals():
             document.status = 'failed'
             document.save()
+            
+            # Refund logic
+            if not document.user.has_active_subscription:
+                document.user.credits += 1
+                document.user.save(update_fields=['credits'])
+
         print(f"Celery task failed for document {document_id}: {e}")
         raise e
 
@@ -109,12 +121,12 @@ def generate_slides_background(document_id, num_slides, quiz_name):
         document.status = 'generating'
         document.save()
 
-        # 1. Extract text
+        # 1. Extract content
         file_path = document.file.path
-        pdf_text = extract_text_from_pdf(file_path)
+        content = extract_content(file_path)
 
         # 2. Call AI to generate slides
-        slides_json_string = generate_slides_from_text(pdf_text, num_slides=num_slides)
+        slides_json_string = generate_slides_from_text(content, num_slides=num_slides)
         
         # Clean the string in case the AI wraps it in markdown blocks
         slides_json_string = slides_json_string.replace('```json', '').replace('```', '').strip()
@@ -146,5 +158,11 @@ def generate_slides_background(document_id, num_slides, quiz_name):
         if 'document' in locals():
             document.status = 'failed'
             document.save()
+            
+            # Refund logic
+            if not document.user.has_active_subscription:
+                document.user.credits += 1
+                document.user.save(update_fields=['credits'])
+
         print(f"Celery task failed for document {document_id}: {e}")
         raise e
