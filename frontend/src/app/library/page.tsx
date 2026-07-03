@@ -15,6 +15,8 @@ interface Quiz {
   is_public: boolean;
   created_on: string;
   questions: any[];
+  flashcards?: any[];
+  slides?: any[];
 }
 
 interface PublicQuiz {
@@ -72,20 +74,34 @@ export default function LibraryPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+    
+    const failSafe = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 3000);
+
     const fetchQuizzes = async () => {
       try {
         const res = await apiFetch("http://127.0.0.1:8000/api/v1/quizzes/");
         if (res.ok) {
           const data = await res.json();
-          setQuizzes(data);
+          if (isMounted) setQuizzes(data);
         }
       } catch (error) {
         console.error("Failed to fetch quizzes:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          clearTimeout(failSafe);
+          setLoading(false);
+        }
       }
     };
     fetchQuizzes();
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(failSafe);
+    };
   }, []);
 
   const fetchPublic = async () => {

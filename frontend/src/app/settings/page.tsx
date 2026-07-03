@@ -26,6 +26,13 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    
+    // Fail-safe to ensure we never get stuck on the loading spinner
+    const failSafe = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 3000);
+
     const fetchUser = async () => {
       try {
         const res = await apiFetch("http://127.0.0.1:8000/api/v1/users/");
@@ -33,18 +40,28 @@ export default function SettingsPage() {
           const data = await res.json();
           if (data && data.length > 0) {
             const user = data[0];
-            setUserId(user.id);
-            setUserName(user.username);
-            setUserStats({ quizzes: user.quiz_count || 0, credits: user.credits || 0 });
+            if (isMounted) {
+              setUserId(user.id);
+              setUserName(user.username);
+              setUserStats({ quizzes: user.quiz_count || 0, credits: user.credits || 0 });
+            }
           }
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          clearTimeout(failSafe);
+          setLoading(false);
+        }
       }
     };
     fetchUser();
+    
+    return () => {
+      isMounted = false;
+      clearTimeout(failSafe);
+    };
   }, []);
 
   const handleSaveName = async (e: React.MouseEvent) => {

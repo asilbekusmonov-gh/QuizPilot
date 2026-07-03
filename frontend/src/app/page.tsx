@@ -7,7 +7,7 @@ import { motion, Variants } from "framer-motion";
 import { useRef } from "react";
 
 const container: Variants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 },
   show: {
     opacity: 1,
     transition: { staggerChildren: 0.1 }
@@ -15,7 +15,7 @@ const container: Variants = {
 };
 
 const item: Variants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  hidden: { opacity: 1, y: 0, scale: 1 },
   show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
 
@@ -39,7 +39,7 @@ export default function CreatePage() {
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       className="pt-10 pb-36 relative min-h-screen bg-zinc-950 overflow-hidden"
     >
@@ -49,7 +49,7 @@ export default function CreatePage() {
 
       {/* Header section */}
       <motion.header 
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="flex justify-between items-center mb-8 px-4 relative z-10"
@@ -75,7 +75,7 @@ export default function CreatePage() {
 
       {/* Apple style large intro typography */}
       <motion.div 
-        initial={{ opacity: 0, x: -20 }}
+        initial={{ opacity: 1, x: 0 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 30 }}
         className="px-4 mb-6 relative z-10"
@@ -88,7 +88,7 @@ export default function CreatePage() {
       {/* BENTO BOX GRID */}
       <motion.div 
         variants={container}
-        initial="hidden"
+        initial="show"
         animate="show"
         ref={gridRef}
         onMouseMove={handleMouseMove}
@@ -202,7 +202,7 @@ export default function CreatePage() {
 
       {/* How it works Button */}
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, type: "spring" }}
         className="mt-10 text-center relative z-10"

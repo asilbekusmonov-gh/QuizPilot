@@ -36,6 +36,11 @@ export default function PremiumPage() {
   ];
 
   useEffect(() => {
+    let isMounted = true;
+    const failSafe = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 3000);
+
     async function fetchPlans() {
       try {
         const res = await apiFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/subscriptions/`);
@@ -43,18 +48,28 @@ export default function PremiumPage() {
           const data = await res.json();
           const plansData = Array.isArray(data) ? data : data.results || [];
           plansData.sort((a: SubscriptionPlan, b: SubscriptionPlan) => a.order - b.order);
-          setPlans(plansData);
-          if (plansData.length > 0) {
-            setSelectedPlanId(plansData[0].id);
+          if (isMounted) {
+            setPlans(plansData);
+            if (plansData.length > 0) {
+              setSelectedPlanId(plansData[0].id);
+            }
           }
         }
       } catch (e) {
         console.error("Failed to fetch plans:", e);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          clearTimeout(failSafe);
+          setLoading(false);
+        }
       }
     }
     fetchPlans();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(failSafe);
+    };
   }, []);
 
   const selectedPlan = plans.find(p => p.id === selectedPlanId);

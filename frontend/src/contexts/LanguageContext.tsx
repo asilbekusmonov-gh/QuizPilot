@@ -42,10 +42,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("language", lang);
   };
 
-  if (!mounted) {
-    return null; // Avoid hydration mismatch
-  }
-
+  // Removed mounted check to allow SSR of the entire app
   return (
     <LanguageContext.Provider value={{ language, setLanguage, dict: dictionaries[language] }}>
       {children}

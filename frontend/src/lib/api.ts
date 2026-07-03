@@ -18,8 +18,32 @@ export async function apiFetch(url: string | URL | Request, options: RequestInit
     headers.delete("Content-Type");
   }
 
-  return fetch(url, {
-    ...options,
-    headers,
-  });
+  let finalUrl = url;
+  if (typeof url === 'string') {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl) {
+      finalUrl = url.replace(/http:\/\/(127\.0\.0\.1|localhost):8000/, apiUrl);
+    }
+  } else if (url instanceof URL) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (apiUrl) {
+      finalUrl = new URL(url.toString().replace(/http:\/\/(127\.0\.0\.1|localhost):8000/, apiUrl));
+    }
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  
+  try {
+    const res = await fetch(finalUrl, {
+      ...options,
+      headers,
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    return res;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
 }

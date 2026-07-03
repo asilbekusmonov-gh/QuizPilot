@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
@@ -24,7 +25,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       tg.expand(); // Expand to full height
       
       // Attempt login via Telegram
-      fetch("http://127.0.0.1:8000/api/v1/auth/telegram/", {
+      apiFetch("http://127.0.0.1:8000/api/v1/auth/telegram/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: tg.initData })
