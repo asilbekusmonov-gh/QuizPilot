@@ -36,6 +36,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "django_celery_results",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -78,6 +80,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "root.wsgi.application"
+ASGI_APPLICATION = "root.asgi.application"
 AUTH_USER_MODEL = "apps.User"
 
 # Database
@@ -130,6 +133,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/min',
+        'user': '1000/day'
+    }
 }
 
 SIMPLE_JWT = {
@@ -155,3 +166,12 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 CELERY_TIMEZONE = "UTC"
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://pittsburgh-health-petersburg-illinois.trycloudflare.com')
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.getenv("REDIS_URL", "redis://localhost:6379/0")],
+        },
+    },
+}

@@ -15,6 +15,7 @@ class Lobby(Model):
     total_time = IntegerField(default=10)
     status = CharField(max_length=20, choices=StatusChoices.choices, default=StatusChoices.WAITING)
     teacher_mode = BooleanField(default=False)
+    current_question_index = IntegerField(default=0)
     created_at = DateTimeField(auto_now_add=True)
 
 
@@ -23,3 +24,12 @@ class LobbyParticipant(Model):
     user = ForeignKey("apps.User", on_delete=CASCADE, related_name='lobby_participations')
     score = IntegerField(default=0)
     joined_at = DateTimeField(auto_now_add=True)
+
+class LobbyAnswer(Model):
+    lobby = ForeignKey("apps.Lobby", on_delete=CASCADE, related_name='answers')
+    user = ForeignKey("apps.User", on_delete=CASCADE, related_name='lobby_answers')
+    question = ForeignKey("apps.Question", on_delete=CASCADE, related_name='lobby_answers')
+    option = ForeignKey("apps.Option", on_delete=CASCADE, related_name='lobby_answers', null=True, blank=True)
+    is_correct = BooleanField(default=False)
+    points_earned = IntegerField(default=0)
+    answered_at = DateTimeField(auto_now_add=True)
