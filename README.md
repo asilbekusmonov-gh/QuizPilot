@@ -1,6 +1,6 @@
 # QuizPilot
 
-QuizPilot is a modern, full-stack web application designed for creating, managing, and playing interactive quizzes and flashcards. Built with an elegant, Apple-inspired "Bento Box" UI, it offers a seamless experience for both educators and students.
+QuizPilot is a modern, full-stack web application and **Telegram Mini App** designed for creating, managing, and playing interactive quizzes and flashcards. Built with an elegant, Apple-inspired "Bento Box" UI, it offers a seamless experience for both educators and students.
 
 ## 🌟 Key Features
 
@@ -9,6 +9,7 @@ QuizPilot is a modern, full-stack web application designed for creating, managin
 *   **Multiplayer Lobbies (Jonli O'yinlar)**: Host live games where participants can join via a 6-digit code, wait in a synced waiting room, and play in real-time.
 *   **Premium Subscriptions**: Advanced features including AI-powered quiz generation from PDFs, increased limits, and more.
 *   **Multi-language Support**: Fully localized interface supporting English, Russian, and Uzbek, built with a custom lightweight React Context system.
+*   **Telegram Mini App Integration**: Access the platform seamlessly within Telegram, featuring auto-login via secure `initData` validation and native-like mobile interactions.
 *   **Apple-style Bento Redesign**: A premium, bouncy, and highly visual frontend experience powered by Next.js and Tailwind CSS.
 *   **RESTful API**: A robust Django backend securely handling all business logic, payments, and data persistence.
 
@@ -27,6 +28,7 @@ QuizPilot is a modern, full-stack web application designed for creating, managin
 ### Frontend
 *   **Framework**: Next.js 16 (App Router) & React 19
 *   **Styling**: Tailwind CSS 4.0
+*   **Integration**: Telegram Web App API
 *   **Icons**: Lucide React
 *   **Language**: TypeScript
 
