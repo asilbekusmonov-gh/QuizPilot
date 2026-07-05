@@ -32,7 +32,7 @@ export async function apiFetch(url: string | URL | Request, options: RequestInit
   }
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
   
   try {
     const res = await fetch(finalUrl, {
