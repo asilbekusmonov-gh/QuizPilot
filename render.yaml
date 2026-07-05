@@ -4,12 +4,12 @@ databases:
     databaseName: quizpilot
     user: quizpilot_user
 
-  - name: quizpilot-redis
-    type: redis
+services:
+  - type: redis
+    name: quizpilot-redis
     plan: free
     ipAllowList: [] # only allow internal connections
 
-services:
   - type: web
     name: quizpilot-backend
     env: python
@@ -22,7 +22,8 @@ services:
           name: quizpilot-db
           property: connectionString
       - key: REDIS_URL
-        fromDatabase:
+        fromService:
+          type: redis
           name: quizpilot-redis
           property: connectionString
       - key: DJANGO_SECRET_KEY
@@ -44,7 +45,8 @@ services:
           name: quizpilot-db
           property: connectionString
       - key: REDIS_URL
-        fromDatabase:
+        fromService:
+          type: redis
           name: quizpilot-redis
           property: connectionString
       - key: DJANGO_SECRET_KEY
