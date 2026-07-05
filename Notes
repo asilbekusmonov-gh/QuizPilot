@@ -86,12 +86,16 @@ cd frontend
 npm run dev
 ----------------------------Tasks---------------------------------
 
+live url - backend
+https://lean-cookies-somerset-integrate.trycloudflare.com
+
+live url frontend site
+
+https://fed-render-penn-boc.trycloudflare.com
 
 
 
 
 
 
-
-
-
+bot.telegram.org/bot{ID}/setWebhook?url=
