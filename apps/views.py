@@ -62,6 +62,14 @@ class QuestionModelViewSet(mixins.UpdateModelMixin, mixins.DestroyModelMixin, mi
         qs = super().get_queryset()
         return qs.filter(quiz__created_by=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            return super().destroy(request, *args, **kwargs)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class OptionModelViewSet(mixins.UpdateModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Option.objects.all()
@@ -261,7 +269,7 @@ class DocumentModelViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, m
                 
             return Response({
                 "error": f"Failed to queue {gen_type}: " + str(e),
-                "detail": "This is often due to an API rate limit. Please try again in a few seconds."
+                "detail": f"Failed to connect to background task queue (Redis). Please ensure Redis and Celery are running! Error: {str(e)}"
             }, status=400)
 
 

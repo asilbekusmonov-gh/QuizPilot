@@ -16,6 +16,9 @@ def generate_quiz_background(document_id, num_questions, quiz_name):
 
         # 2. Call AI to generate quiz
         quiz_json_string = generate_quiz_from_text(content, num_questions=num_questions)
+        
+        # Clean markdown code blocks if the AI returns them
+        quiz_json_string = quiz_json_string.replace('```json', '').replace('```', '').strip()
         quiz_data = json.loads(quiz_json_string)
 
         # 3. Create database records
@@ -76,6 +79,9 @@ def generate_flashcards_background(document_id, num_cards, quiz_name):
 
         # 2. Call AI to generate flashcards
         cards_json_string = generate_flashcards_from_text(content, num_cards=num_cards)
+        
+        # Clean markdown code blocks
+        cards_json_string = cards_json_string.replace('```json', '').replace('```', '').strip()
         cards_data = json.loads(cards_json_string)
 
         # 3. Create database records

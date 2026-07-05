@@ -27,6 +27,7 @@ dependencies = [
     "pytelegrambotapi>=4.34.0",
     "python-dotenv>=1.2.2",
     "redis>=8.0.0",
+    "whitenoise>=6.12.0",
 ]
 
 [dependency-groups]

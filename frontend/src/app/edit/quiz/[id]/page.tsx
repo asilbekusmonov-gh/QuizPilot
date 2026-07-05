@@ -66,11 +66,18 @@ export default function EditQuizPage() {
         }
         setConfirmDeleteId(null);
       } else {
-        alert("Failed to delete question.");
+        let errMessage = "Failed to delete question.";
+        try {
+          const errData = await res.json();
+          errMessage += " " + (errData.error || errData.detail || JSON.stringify(errData));
+        } catch(e) {
+          errMessage += ` (Status: ${res.status})`;
+        }
+        alert(errMessage);
       }
     } catch (err) {
       console.error(err);
-      alert("Error deleting question.");
+      alert("Error deleting question: " + (err as Error).message);
     }
   };
 

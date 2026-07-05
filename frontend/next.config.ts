@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Allow Cloudflare tunnel origin for Webpack HMR (auto-reload)
+  allowedDevOrigins: [
+    'decimal-tape-latest-sampling.trycloudflare.com'
+  ]
 };
 
 export default nextConfig;
