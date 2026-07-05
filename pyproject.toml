@@ -25,6 +25,7 @@ dependencies = [
     "psycopg2-binary>=2.9.12",
     "pymupdf>=1.27.2.3",
     "pytelegrambotapi>=4.34.0",
+    "python-docx>=1.2.0",
     "python-dotenv>=1.2.2",
     "redis>=8.0.0",
     "whitenoise>=6.12.0",
