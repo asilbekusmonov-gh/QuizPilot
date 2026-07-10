@@ -1,6 +1,6 @@
 # QuizPilot
 
-🚀 **Play Live on Telegram:** [@quizjet_bot](https://t.me/quizjet_bot)
+🚀 **Play Live on Telegram:** [@quizjet_bot](https://t.me/quizjet_bot) not working (fixing some bugs)
 
 QuizPilot is a modern, full-stack web application and **Telegram Mini App** designed for creating, managing, and playing interactive quizzes and flashcards. Built with an elegant, Apple-inspired "Bento Box" UI, it offers a seamless experience for both educators and students.
 
